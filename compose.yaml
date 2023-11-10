@@ -1,0 +1,7 @@
+services:
+  web:
+    build: flask
+    ports:
+      - "0.0.0.0:8000:5000"
+    volumes:
+      - ./flask:/app
