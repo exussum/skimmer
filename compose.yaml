@@ -1,7 +1,16 @@
 services:
-  web:
+  be:
     build: flask
     ports:
       - "0.0.0.0:8000:5000"
     volumes:
       - ./flask:/app
+    env_file: flask/.env
+  fe:
+    build: react
+    volumes:
+      - ./react:/app
+    ports:
+      - "0.0.0.0:8080:3000"
+    env_file: react/.env
+ 
