@@ -8,6 +8,7 @@ import {
 } from "react";
 import "./App.css";
 import { useQuery, QueryClient, QueryClientProvider } from "react-query";
+import { Dropdown, Navbar, Button } from "flowbite-react";
 
 const DEFAULT = { status: null, login: null };
 export const AuthContext = createContext(DEFAULT);
@@ -16,19 +17,27 @@ const queryClient = new QueryClient();
 function App() {
   const [ctx, setCtx] = useState(DEFAULT);
   return (
-    <AuthContext.Provider value={{ ctx, setCtx }}>
-      <QueryClientProvider client={queryClient}>
-        <LoginBar />
-      </QueryClientProvider>
-    </AuthContext.Provider>
+    <div class="mx-8 mt-8">
+      <AuthContext.Provider value={{ ctx, setCtx }}>
+        <QueryClientProvider client={queryClient}>
+          <Header />
+        </QueryClientProvider>
+      </AuthContext.Provider>
+    </div>
   );
 }
 
-export const LoginBar = () => {
+export const Header = () => {
   const { ctx } = useContext(AuthContext);
   const Component = STATUS_TO_COMPONENT[ctx.status];
-  console.log(ctx, Component);
-  return <Component />;
+  return (
+    <div class="flex">
+      <div class="flex-1">Skimmer</div>
+      <div class="flex-none">
+        <Component />
+      </div>
+    </div>
+  );
 };
 
 export const WhoAmI = () => {
@@ -71,11 +80,26 @@ export const Anonymous = () => {
   const { setCtx } = useContext(AuthContext);
   return (
     <>
-      <input
-        value="Authenticate"
+      <button
         type="button"
-        onClick={useCallback(() => setCtx({ status: "auth" }))}
-      />
+        class="text-white bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55 me-2 mb-2"
+        onClick={useCallback(() => setCtx({ status: "auth" }), [setCtx])}
+      >
+        <svg
+          class="w-4 h-4 me-2"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 18 19"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M8.842 18.083a8.8 8.8 0 0 1-8.65-8.948 8.841 8.841 0 0 1 8.8-8.652h.153a8.464 8.464 0 0 1 5.7 2.257l-2.193 2.038A5.27 5.27 0 0 0 9.09 3.4a5.882 5.882 0 0 0-.2 11.76h.124a5.091 5.091 0 0 0 5.248-4.057L14.3 11H9V8h8.34c.066.543.095 1.09.088 1.636-.086 5.053-3.463 8.449-8.4 8.449l-.186-.002Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Sign in with Google
+      </button>
     </>
   );
 };
@@ -84,12 +108,13 @@ export const LoginInfo = () => {
   const { ctx, setCtx } = useContext(AuthContext);
   return (
     <>
-      Login: {ctx.login} |{" "}
-      <input
-        value="Logout"
-        type="button"
-        onClick={useCallback(() => setCtx({ status: "logout" }))}
-      />
+      <Dropdown inline label={ctx.login}>
+        <Dropdown.Item
+          onClick={useCallback(() => setCtx({ status: "logout" }), [setCtx])}
+        >
+          Logout
+        </Dropdown.Item>
+      </Dropdown>
     </>
   );
 };
