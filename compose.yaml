@@ -13,4 +13,22 @@ services:
     ports:
       - "0.0.0.0:8080:3000"
     env_file: react/.env
+  db:
+    image: postgres:16.1 
+    environment:
+      POSTGRES_PASSWORD: skimmer
+      POSTGRES_USER: skimmer
+      POSTGRES_DB: skimmer
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "0.0.0.0:5432:5432"
+  memcached:
+    image: memcached:1.6.22-alpine
+    command: ["-m", "4096"]
+    ports:  
+       - "11211:11211"  
  
+
+volumes:
+  pgdata:

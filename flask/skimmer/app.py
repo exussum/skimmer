@@ -1,40 +1,34 @@
 from flask import Flask, session, redirect, request
-import jwt
-import requests
-from urllib.parse import urlunsplit, urlencode, urlsplit
-import random
-import string
 from flask_cors import CORS
+from flask_session import Session
 
 from skimmer.config import Config
-
+from skimmer.api.auth import oauth_token_req, submit_oauth_code
+from pymemcache.client.base import Client
 
 app = Flask(__name__)
-app.secret_key = Config.Flask.SECRET_KEY
-CORS(app, origins=["http://localhost:8080", "http://localhost:8000"], supports_credentials=True)
+app.config.update(
+    {
+        "SECRET_KEY": Config.Flask.FLASK_SECRET_KEY,
+        "SESSION_TYPE": "memcached",
+        "SESSION_MEMCACHED": Client(Config.Memcached.MEMCACHED_SERVER),
+        "SESSION_KEY_PREFIX": Config.Memcached.MEMCACHED_KEY_PREFIX,
+        "PERMANENT_SESSION_LIFETIME": Config.Flask.FLASK_PERMANENT_SESSION_LIFETIME,
+    }
+)
 
-RANDOM_CHARACTERS = string.ascii_lowercase + string.digits
-
-
-def random_id():
-    generator = random.SystemRandom()
-    return "".join(generator.choice(RANDOM_CHARACTERS) for _ in range(32))
+CORS(
+    app,
+    origins=["http://localhost:8080", "http://localhost:8000"],
+    supports_credentials=True,
+)
+Session(app)
 
 
 @app.route("/auth/start")
 def start():
-    session["state"] = random_id()
-    parts = urlsplit(Config.Google.URL_AUTH)
-    params = urlencode(
-        (
-            ("client_id", Config.Google.GOOGLE_CLIENT_ID),
-            ("redirect_uri", Config.Google.GOOGLE_REDIRECT_URL),
-            ("response_type", "code"),
-            ("scope", "openid profile email"),
-            ("state", session["state"]),
-        )
-    )
-    return {"url": urlunsplit(parts[:3] + (params,) + parts[4:])}
+    session["state"], url = oauth_token_req()
+    return {"url": url}
 
 
 @app.route("/auth/code")
@@ -45,22 +39,7 @@ def code():
     if "state" in session and state == session["state"]:
         state = session.pop("state")
         session.clear()
-
-        result = requests.post(
-            Config.Google.URL_TOKEN,
-            {
-                "grant_type": "authorization_code",
-                "client_id": Config.Google.GOOGLE_CLIENT_ID,
-                "client_secret": Config.Google.GOOGLE_CLIENT_SECRET,
-                "redirect_uri": Config.Google.GOOGLE_REDIRECT_URL,
-                "code": request.args["code"],
-            },
-        )
-        result.raise_for_status()
-        js = result.json()
-        session["email"] = jwt.decode(
-            js["id_token"], options={"verify_signature": False}
-        )["email"]
+        session["email"] = submit_oauth_code(code)
 
     session.modified = True
     return redirect(Config.React.REACT_HOME_URL)

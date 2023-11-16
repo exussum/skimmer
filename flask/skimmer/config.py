@@ -12,7 +12,14 @@ class Config:
         URL_AUTH = "https://accounts.google.com/o/oauth2/v2/auth"
 
     class Flask:
-        SECRET_KEY = get("FLASK_SECRET_KEY") or "abc123"
+        FLASK_SECRET_KEY = get("FLASK_SECRET_KEY") or "abc123"
+        FLASK_PERMANENT_SESSION_LIFETIME = int(
+            get("FLASK_PERMANENT_SESSION_LIFETIME") or 0
+        )
 
     class React:
         REACT_HOME_URL = get("REACT_HOME_URL")
+
+    class Memcached:
+        MEMCACHED_KEY_PREFIX = get("MEMCACHED_KEY_PREFIX")
+        MEMCACHED_SERVER = get("MEMCACHED_SERVER")
