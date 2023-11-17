@@ -3,9 +3,9 @@ from flask import Flask
 from flask_cors import CORS
 from flask_session import Session
 from skimmer.db import db
-
 from skimmer.config import Config
 from pymemcache.client.base import Client
+import click
 
 app = Flask(__name__)
 app.config.update(
@@ -28,4 +28,4 @@ CORS(
 Session(app)
 db.init_app(app)
 
-app.register_blueprint(auth.auth, url_prefix="/auth")
+app.register_blueprint(auth.bp, url_prefix="/auth")

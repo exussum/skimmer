@@ -1,5 +1,5 @@
 from skimmer.dal.google import submit_oauth_code
-from skimmer.dal.queries import email_exists
+from skimmer.dal.queries import user_exists, add_user
 
 from urllib.parse import urlunsplit, urlencode, urlsplit
 import random
