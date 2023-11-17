@@ -16,6 +16,7 @@ class Config:
         FLASK_PERMANENT_SESSION_LIFETIME = int(
             get("FLASK_PERMANENT_SESSION_LIFETIME") or 0
         )
+        FLASK_SQLALCHEMY_DATABASE_URI = get("FLASK_SQLALCHEMY_DATABASE_URI")
 
     class React:
         REACT_HOME_URL = get("REACT_HOME_URL")

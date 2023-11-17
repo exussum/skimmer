@@ -9,6 +9,8 @@ cryptography==41.0.5
 Flask==3.0.0
 Flask-Cors==4.0.0
 Flask-Session==0.5.0
+Flask-SQLAlchemy==3.1.1
+greenlet==3.0.1
 idna==3.4
 itsdangerous==2.1.2
 Jinja2==3.1.2
@@ -22,5 +24,8 @@ pycparser==2.21
 PyJWT==2.8.0
 pymemcache==4.0.0
 requests==2.31.0
+SQLAlchemy==2.0.23
+typing_extensions==4.8.0
 urllib3==2.0.7
 Werkzeug==3.0.1
+psycopg2-binary
