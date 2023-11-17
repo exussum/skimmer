@@ -1,4 +1,5 @@
 import { loginRedirect, logout, getWhoAmi } from "./api/auth";
+import { useCookies } from "react-cookie";
 import {
   useCallback,
   useEffect,
@@ -9,6 +10,7 @@ import {
 import "./App.css";
 import { useQuery, QueryClient, QueryClientProvider } from "react-query";
 import { Dropdown } from "flowbite-react";
+import { Modal } from "flowbite-react";
 
 const DEFAULT = { status: null, login: null };
 export const AuthContext = createContext(DEFAULT);
@@ -26,6 +28,8 @@ function App() {
     </div>
   );
 }
+
+///
 
 export const Header = () => {
   const { ctx } = useContext(AuthContext);
@@ -74,10 +78,13 @@ export const Authenticate = () => {
       }
     }
   }, [setCtx, data, error, isLoading]);
+  return <div>Redirecting...</div>;
 };
 
 export const Anonymous = () => {
   const { setCtx } = useContext(AuthContext);
+  const [cookies] = useCookies(["guest"]);
+
   return (
     <>
       <button
@@ -100,7 +107,30 @@ export const Anonymous = () => {
         </svg>
         Sign in with Google
       </button>
+      {cookies.guest ? <GuestUserWarning /> : ""}
     </>
+  );
+};
+
+export const GuestUserWarning = () => {
+  const [, setCookie] = useCookies(["guest"]);
+
+  return (
+    <Modal
+      show={true}
+      onClose={useCallback(() => {
+        setCookie("guest", false);
+      }, [setCookie])}
+    >
+      <Modal.Header>Hi!</Modal.Header>
+      <Modal.Body>
+        <div className="space-y-6">
+          <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+            Not much for you to see here. Contact the ower to be whitelisted!
+          </p>
+        </div>
+      </Modal.Body>
+    </Modal>
   );
 };
 
