@@ -17,8 +17,9 @@ fi
 
 docker compose down -v
 docker compose build --no-cache
-docker compose start
+docker compose up -d
 
 # used on intel machines, I don't have an m1 anymore.
 cd tf
+sleep 5
 /usr/local/bin/atlas migrate apply --env local
