@@ -1,4 +1,5 @@
 import { loginRedirect, logout, getWhoAmi } from "./api/auth";
+import { Flowbite } from 'flowbite-react';
 import { useCookies } from "react-cookie";
 import {
   useCallback,
@@ -19,14 +20,23 @@ const queryClient = new QueryClient();
 function App() {
   const [ctx, setCtx] = useState(DEFAULT);
   return (
-    <div className="mx-8 mt-8">
+    <div className="h-screen px-8 py-8">
+      <div className="h-full px-2 py-2 bg-content rounded-l ">
       <AuthContext.Provider value={{ ctx, setCtx }}>
         <QueryClientProvider client={queryClient}>
           <Header />
+          <Body />
         </QueryClientProvider>
       </AuthContext.Provider>
     </div>
+    </div>
   );
+}
+
+///
+
+export const Body = () => {
+   return <div>Hi</div>
 }
 
 ///
@@ -115,37 +125,65 @@ export const Anonymous = () => {
 export const GuestUserWarning = () => {
   const [, setCookie] = useCookies(["guest"]);
 
+  const theme = {
+      modal: {
+          header: { 
+            title: "text-white"
+          },
+          body: {
+            title: "text-white"
+          },
+          content: {inner: "bg-popup"}
+      }
+  };
+
   return (
-    <Modal
-      show={true}
-      onClose={useCallback(() => {
-        setCookie("guest", false);
-      }, [setCookie])}
-    >
-      <Modal.Header>Hi!</Modal.Header>
-      <Modal.Body>
-        <div className="space-y-6">
-          <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-            Not much for you to see here. Contact the ower to be whitelisted!
-          </p>
-        </div>
-      </Modal.Body>
-    </Modal>
+    <Flowbite theme={{theme: theme}}>
+        <Modal
+          show={true}
+          onClose={useCallback(() => {
+            setCookie("guest", false);
+          }, [setCookie])}
+        >
+          <Modal.Header>Hi!</Modal.Header>
+          <Modal.Body>
+            <div className="space-y-6">
+              <p className="text-base leading-relaxed">
+                Not much for you to see here. Contact the ower to be whitelisted!
+              </p>
+            </div>
+          </Modal.Body>
+        </Modal>
+    </Flowbite>
   );
 };
 
 export const LoginInfo = () => {
   const { ctx, setCtx } = useContext(AuthContext);
+  const theme = {
+     dropdown: {
+        floating: {
+            "arrow": {
+              "style": {
+                "auto": "bg-popup",
+              }
+            },
+        item: { container: "bg-menu", base:  "flex items-center justify-start py-2 px-4 text-sm  w-full hover:bg-popup focus:bg-popup  focus:outline-none"},
+        style: { "auto": "bg-menu text-white" }
+        },
+     }
+  };
+
   return (
-    <>
+    <Flowbite theme={{theme: theme}}>
       <Dropdown inline label={ctx.login}>
         <Dropdown.Item
           onClick={useCallback(() => setCtx({ status: "logout" }), [setCtx])}
         >
-          Logout
+          <div>Logout</div>
         </Dropdown.Item>
       </Dropdown>
-    </>
+    </Flowbite>
   );
 };
 

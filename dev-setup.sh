@@ -2,7 +2,8 @@
 
 brew install ariga/tap/atlas
 
-cat << EOF > flask/.env
+if [ ! -f flask/.env ]; then
+    cat << EOF > flask/.env
 GOOGLE_CLIENT_ID=unset
 GOOGLE_CLIENT_SECRET=unset
 GOOGLE_REDIRECT_URL="http://localhost:8000/auth/code"
@@ -12,3 +13,12 @@ REACT_HOME_URL=http://localhost:8080/
 FLASK_PERMANENT_SESSION_LIFETIME=5
 FLASK_SQLALCHEMY_DATABASE_URI=postgresql://skimmer:skimmer@db/skimmer
 EOF
+fi
+
+docker compose down -v
+docker compose build --no-cache
+docker compose start
+
+# used on intel machines, I don't have an m1 anymore.
+cd tf
+/usr/local/bin/atlas migrate apply --env local
