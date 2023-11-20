@@ -1,15 +1,11 @@
+from skimmer.config import Config
 from skimmer.dal.google import submit_oauth_code
 from skimmer.dal.queries import user_exists, add_user
-
 from urllib.parse import urlunsplit, urlencode, urlsplit
 import random
 import string
 
-from skimmer.config import Config
-
-
 RANDOM_CHARACTERS = string.ascii_lowercase + string.digits
-
 
 def _random_id():
     generator = random.SystemRandom()

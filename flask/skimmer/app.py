@@ -1,4 +1,4 @@
-from skimmer.views import auth
+from skimmer.views import auth, i18n
 from flask import Flask
 from flask_cors import CORS
 from flask_session import Session
@@ -29,3 +29,5 @@ Session(app)
 db.init_app(app)
 
 app.register_blueprint(auth.bp, url_prefix="/auth")
+app.register_blueprint(i18n.bp, url_prefix="/i18n")
+
