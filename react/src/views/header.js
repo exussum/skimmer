@@ -67,7 +67,7 @@ const useAuthOnClick = () => {
 
 const useGuestOnClick = () => {
   const [, setCookie] = useCookies(["guest"]);
-  useCallback(() => {
+  return useCallback(() => {
     setCookie("guest", false);
   }, [setCookie]);
 };

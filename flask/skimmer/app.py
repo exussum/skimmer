@@ -1,11 +1,12 @@
-from skimmer.views import auth, i18n
-from flask import Flask
+import click
 from flask_cors import CORS
 from flask_session import Session
-from skimmer.db import db
-from skimmer.config import Config
 from pymemcache.client.base import Client
-import click
+
+from flask import Flask
+from skimmer.config import Config
+from skimmer.db import db
+from skimmer.views import auth, group, i18n
 
 app = Flask(__name__)
 app.config.update(
@@ -19,6 +20,9 @@ app.config.update(
     }
 )
 
+app.register_blueprint(auth.bp, url_prefix="/auth")
+app.register_blueprint(i18n.bp, url_prefix="/i18n")
+app.register_blueprint(group.bp, url_prefix="/group")
 
 CORS(
     app,
@@ -27,7 +31,3 @@ CORS(
 )
 Session(app)
 db.init_app(app)
-
-app.register_blueprint(auth.bp, url_prefix="/auth")
-app.register_blueprint(i18n.bp, url_prefix="/i18n")
-

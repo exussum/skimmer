@@ -1,0 +1,26 @@
+default_install_hook_types: [pre-commit, prepare-commit-msg, commit-msg]
+repos:
+  - repo: https://github.com/ambv/black
+    rev: 22.10.0
+    hooks:
+      - id: black
+        language_version: python3
+        types_or: [python, pyi]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.5
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black", "-p", "skimmer"]
+  - repo: local
+    hooks:
+      - id: js
+        name: prettier
+        language: system
+        entry: docker compose exec -T fe sh -c 'yarn run prettier -w src'

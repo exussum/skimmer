@@ -19,7 +19,7 @@ export const GuestUserWarning = (props) => {
   return (
     <Flowbite theme={{ theme: theme }}>
       <Modal show={true} onClick={props.onClick}>
-        <Modal.Header>Hi!</Modal.Header>
+        <Modal.Header></Modal.Header>
         <Modal.Body>
           <div className="space-y-6">
             <p className="text-base leading-relaxed">

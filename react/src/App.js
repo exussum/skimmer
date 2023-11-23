@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next";
 import Backend from "i18next-http-backend";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Header } from "./views/header";
+import { Go } from "./component/group";
 import { AuthContext, useAuthState } from "./api/auth";
 
 i18n
@@ -38,5 +39,5 @@ export const App = () => {
 export default App;
 
 const Body = () => {
-  return <div>Hi</div>;
+  return <Go />;
 };
