@@ -1,36 +1,27 @@
 from flask import Blueprint, make_response, request, session
+from skimmer.api import auth, flask, group
 
 bp = Blueprint("group", __name__)
 
-groups = [
-    {
-        "id": 1,
-        "name": "alice",
-    },
-    {
-        "id": 2,
-        "name": "bob",
-    },
-]
 
-id = 3
+@bp.route("/<channel_id>/", methods=["GET"])
+@flask.protect
+def fetch_groups(user_id, channel_id):
+    return [
+        {"id": id, "name": name}
+        for (id, name) in group.fetch_groups(user_id, channel_id)
+    ]
 
 
-@bp.route("/", methods=["GET"])
-def fetch_groups():
-    return groups
-
-
-@bp.route("/", methods=["POST"])
-def add_group():
-    global id
-    id += 1
-    groups.append({"id": id, "name": request.form.get("name")})
+@bp.route("/<channel_id>/", methods=["POST"])
+@flask.protect
+def add_group(user_id, channel_id):
+    group.add_group(user_id, channel_id, request.form.get("name"))
     return "", 204
 
 
-@bp.route("/<id>", methods=["DELETE"])
-def delete_group(id):
-    global groups
-    groups = [e for e in groups if e["id"] != int(id)]
+@bp.route("/<channel_id>/<id>", methods=["DELETE"])
+@flask.protect
+def delete_group(user_id, channel_id, id):
+    group.delete_group(user_id, channel_id, id)
     return "", 204

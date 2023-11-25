@@ -1,8 +1,9 @@
-from flask import session, redirect, request, make_response, Blueprint
 import click
 
+from flask import Blueprint, make_response, redirect, request, session
+from skimmer.api.auth import add_user, id_for_email, oauth_token_req, submit_oauth_code
+from skimmer.api.group import ChannelType, create_or_update_channel
 from skimmer.config import Config
-from skimmer.api.auth import oauth_token_req, submit_oauth_code, user_exists, add_user
 
 bp = Blueprint("auth", __name__)
 
@@ -23,9 +24,13 @@ def code():
     if "state" in session and state == session["state"]:
         state = session.pop("state")
         session.clear()
-        email = submit_oauth_code(code)
-        if user_exists(email):
+        email, key = submit_oauth_code(code)
+        import sys
+
+        if id := id_for_email(email):
+            create_or_update_channel(id, key, ChannelType.Google)
             session["email"] = email
+            session["user_id"] = id
             session.modified = True
             resp.set_cookie("guest", "false")
         else:

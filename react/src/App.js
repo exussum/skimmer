@@ -39,5 +39,5 @@ export const App = () => {
 export default App;
 
 const Body = () => {
-  return <Go />;
+  return <Go channelId="1" />;
 };

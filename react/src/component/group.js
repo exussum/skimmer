@@ -1,6 +1,6 @@
 import { Button, TextInput } from "flowbite-react";
 import { apiClient } from "../config";
-import { useCallback, useState } from "react";
+import { useRef, useCallback, useState } from "react";
 import { useQueryClient, useQuery, useMutation } from "react-query";
 import { Flowbite } from "flowbite-react";
 
@@ -18,7 +18,6 @@ export const Listing = (props) => {
         );
       })
     : [];
-  console.log(items, props.data);
 
   const [value, setValue] = useState("");
 
@@ -33,6 +32,7 @@ export const Listing = (props) => {
       },
     },
   };
+  const textInputRef = useRef(null);
 
   return (
     <div className="bg-menu flex flex-col w-80 p-2 rounded-lg">
@@ -42,6 +42,7 @@ export const Listing = (props) => {
           <TextInput
             enabled={(!props.processing).toString()}
             className="flex-1"
+            ref={textInputRef}
             placeholder="New Group"
             onChange={useCallback(
               (r) => setValue(r.currentTarget.value),
@@ -53,7 +54,13 @@ export const Listing = (props) => {
           enabled={(!props.processing).toString()}
           color="{ props.processing ? 'dark' : 'black' }"
           className="flex-initial bg-popup rounded-none rounded-r-lg"
-          onClick={useCallback((r) => props.addGroup(value), [value, props])}
+          onClick={useCallback(
+            (r) => {
+              props.addGroup(value);
+              textInputRef.current.value = "";
+            },
+            [value, props, textInputRef],
+          )}
         >
           Add
         </Button>
@@ -86,44 +93,45 @@ const ListItem = (props) => {
   );
 };
 
-export const fetchGroups = async () => {
-  return apiClient.get("/group/").then((res) => res.data);
+export const fetchGroups = async ({ queryKey }) => {
+  const [, channelId] = queryKey;
+  return apiClient.get(`/group/${channelId}`).then((res) => res.data);
 };
 
-export const addGroup = async (name) => {
+export const addGroup = async ({ name, channelId }) => {
   const params = new URLSearchParams({
     name: name,
   });
-  return apiClient.post("/group/", params, {
+  return apiClient.post(`/group/${channelId}`, params, {
     headers: { "content-type": "application/x-www-form-urlencoded" },
   });
 };
 
-export const deleteGroup = async (id) => {
-  return apiClient.delete(`/group/${id}`);
+export const deleteGroup = async ({ channelId, id }) => {
+  return apiClient.delete(`/group/${channelId}/${id}`);
 };
 
-export const Go = (id) => {
+export const Go = (props) => {
+  const channelId = props.channelId;
   const [, setProcessing] = useState(false);
-  const { isLoading, isError, data } = useQuery(["groups"], fetchGroups);
+  const key = ["groups", channelId];
+  const { isLoading, data } = useQuery(key, fetchGroups);
   const queryClient = useQueryClient();
 
   const addMutation = useMutation(addGroup, {
     onSuccess: () => {
       setProcessing(false);
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: key });
     },
   });
   const deleteMutation = useMutation(deleteGroup, {
     onSuccess: () => {
       setProcessing(false);
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: key });
     },
   });
 
-  const stuff = (bigId, id) => {
-    console.log("hi");
-  };
+  const stuff = (bigId, id) => {};
 
   return (
     <Listing
@@ -132,12 +140,12 @@ export const Go = (id) => {
       selectGroup={(id) => stuff("select", id)}
       deleteGroup={(id) => {
         setProcessing(true);
-        deleteMutation.mutate(id);
+        deleteMutation.mutate({ channelId: channelId, id: id });
       }}
       addGroup={(name) => {
         if (name) {
           setProcessing(true);
-          addMutation.mutate(name);
+          addMutation.mutate({ channelId: channelId, name: name });
         }
       }}
     />

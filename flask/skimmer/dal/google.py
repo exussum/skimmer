@@ -1,6 +1,7 @@
+import string
+
 import jwt
 import requests
-import string
 
 from skimmer.config import Config
 
@@ -20,4 +21,5 @@ def submit_oauth_code(code):
     )
     result.raise_for_status()
     js = result.json()
-    return jwt.decode(js["id_token"], options={"verify_signature": False})["email"]
+    result = jwt.decode(js["id_token"], options={"verify_signature": False})
+    return result["email"], js["access_token"]
