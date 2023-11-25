@@ -1,5 +1,6 @@
 import { Flowbite, Modal, Dropdown } from "flowbite-react";
 import { useTranslation } from "react-i18next";
+import { useCallback } from "react";
 
 export const GuestUserWarning = (props) => {
   const { t } = useTranslation();
@@ -51,14 +52,44 @@ export const UserMenu = (props) => {
     },
   };
 
+  const channels = props.channels.map((e, i) => {
+    return (
+      <ChannelItem
+        key={`channel-${i}`}
+        id={e.id}
+        channelType={e.channel_type}
+        addPath={e.add_path}
+        deleteChannel={props.deleteChannel}
+      />
+    );
+  });
+
   return (
     <Flowbite theme={{ theme: theme }}>
       <Dropdown inline label={props.login}>
-        <Dropdown.Item onClick={props.onClick}>
+        <Dropdown.Item key="logout" onClick={props.onClick}>
           <div>{t("Logout")}</div>
         </Dropdown.Item>
+        {channels}
       </Dropdown>
     </Flowbite>
+  );
+};
+
+const ChannelItem = (props) => {
+  const { t } = useTranslation();
+  const action = props.id ? t("Remove Channel") : t("Add Channel");
+  const onClick = useCallback(() => {
+    if (props.id) {
+      props.deleteChannel(props.id);
+    } else {
+      window.location = props.addPath;
+    }
+  }, [props]);
+  return (
+    <Dropdown.Item onClick={onClick}>
+      {action} {props.channelType}
+    </Dropdown.Item>
   );
 };
 

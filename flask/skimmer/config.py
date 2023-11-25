@@ -24,3 +24,6 @@ class Config:
     class Memcached:
         MEMCACHED_KEY_PREFIX = get("MEMCACHED_KEY_PREFIX")
         MEMCACHED_SERVER = get("MEMCACHED_SERVER")
+
+    class Channel:
+        CHANNEL_GOOGLE_REDIRECT_URL = get("CHANNEL_GOOGLE_REDIRECT_URL")

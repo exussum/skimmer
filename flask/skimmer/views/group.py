@@ -4,7 +4,7 @@ from skimmer.api import auth, flask, group
 bp = Blueprint("group", __name__)
 
 
-@bp.route("/<channel_id>/", methods=["GET"])
+@bp.route("/<channel_id>", methods=["GET"])
 @flask.protect
 def fetch_groups(user_id, channel_id):
     return [
@@ -13,7 +13,7 @@ def fetch_groups(user_id, channel_id):
     ]
 
 
-@bp.route("/<channel_id>/", methods=["POST"])
+@bp.route("/<channel_id>", methods=["POST"])
 @flask.protect
 def add_group(user_id, channel_id):
     group.add_group(user_id, channel_id, request.form.get("name"))

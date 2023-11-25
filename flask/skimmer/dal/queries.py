@@ -1,4 +1,4 @@
-from sqlalchemy import column
+from sqlalchemy import column, delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from skimmer.dal import models as m
@@ -22,10 +22,18 @@ def add_user(email):
 
 def fetch_groups(user_id, channel_id):
     return list(
-        db.session.query(m.Channel.id, m.Channel.type, m.Group.id, m.Group.name)
+        db.session.query(m.Group.id, m.Group.name)
         .filter(m.Group.channel_id == channel_id, m.Channel.user_id == user_id)
         .join(m.Channel.groups)
         .all()
+    )
+
+
+def fetch_channels(user_id):
+    return list(
+        db.session.query(m.Channel.id, m.Channel.type).filter(
+            m.Channel.user_id == user_id
+        )
     )
 
 
@@ -35,9 +43,15 @@ def add_group(user_id, channel_id, name):
 
 
 def delete_group(user_id, channel_id, id):
-    session.query(m.Group).filter(
-        m.Group.channel_id == channel_id, m.Group.id == id
-    ).delete()
+    session.execute(
+        delete(m.Group).where(
+            m.Group.id == id,
+            m.Group.channel_id
+            == select(m.Channel.id)
+            .where(m.Channel.id == channel_id, m.Channel.user_id == user_id)
+            .scalar_subquery(),
+        )
+    )
     session.commit()
 
 
@@ -52,3 +66,18 @@ def create_or_update_channel(user_id, key, type):
     id = result[0]
     session.commit()
     return id
+
+
+def delete_channel(user_id, id):
+    session.execute(
+        delete(m.Group).where(
+            m.Group.channel_id
+            == select(m.Channel.id)
+            .where(m.Channel.id == id, m.Channel.user_id == user_id)
+            .scalar_subquery()
+        )
+    )
+    session.execute(
+        delete(m.Channel).where(m.Channel.id == id, m.Channel.user_id == user_id)
+    )
+    session.commit()

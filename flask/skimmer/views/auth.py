@@ -2,7 +2,7 @@ import click
 
 from flask import Blueprint, make_response, redirect, request, session
 from skimmer.api.auth import add_user, id_for_email, oauth_token_req, submit_oauth_code
-from skimmer.api.group import ChannelType, create_or_update_channel
+from skimmer.api.channel import ChannelType, create_or_update_channel, fetch_channels
 from skimmer.config import Config
 
 bp = Blueprint("auth", __name__)
@@ -22,17 +22,20 @@ def code():
     resp = make_response(redirect(Config.React.REACT_HOME_URL))
 
     if "state" in session and state == session["state"]:
-        state = session.pop("state")
+        state = session.get("state")
+        add_google = session.get("add_google")
         session.clear()
+
         email, key = submit_oauth_code(code)
-        import sys
 
         if id := id_for_email(email):
-            create_or_update_channel(id, key, ChannelType.Google)
             session["email"] = email
             session["user_id"] = id
             session.modified = True
             resp.set_cookie("guest", "false")
+
+            if add_google:
+                create_or_update_channel(id, key, ChannelType.Google)
         else:
             resp.set_cookie("guest", "true")
     else:
@@ -48,11 +51,18 @@ def logout():
 
 @bp.route("/whoami")
 def whoami():
-    if "email" in session:
-        return {"email": session["email"]}
+    if "user_id" in session:
+        channels = fetch_channels(session["user_id"])
+        return {
+            "email": session["email"],
+            "channels": [
+                {"channel_type": e.channel_type, "id": e.id, "add_path": e.add_path}
+                for e in channels
+            ],
+        }
     else:
         session.permanent = False
-        return {"shrug": "shrug"}
+        return {}
 
 
 @bp.cli.command("add-email")

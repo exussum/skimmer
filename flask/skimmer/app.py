@@ -6,7 +6,7 @@ from pymemcache.client.base import Client
 from flask import Flask
 from skimmer.config import Config
 from skimmer.db import db
-from skimmer.views import auth, group, i18n
+from skimmer.views import auth, channel, group, i18n
 
 app = Flask(__name__)
 app.config.update(
@@ -20,9 +20,13 @@ app.config.update(
     }
 )
 
-app.register_blueprint(auth.bp, url_prefix="/auth")
-app.register_blueprint(i18n.bp, url_prefix="/i18n")
-app.register_blueprint(group.bp, url_prefix="/group")
+for (path, mod) in {
+    "/auth": auth,
+    "/i18n": i18n,
+    "/group": group,
+    "/channel": channel,
+}.items():
+    app.register_blueprint(mod.bp, url_prefix=path)
 
 CORS(
     app,

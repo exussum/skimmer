@@ -1,17 +1,25 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { AuthContext, loginRedirect, logout, getWhoAmi } from "../api/auth";
+import { deleteChannel } from "../api/channel";
 import { UserMenu, GuestUserWarning, GoogleButton } from "../component/auth";
 import { useContext, useCallback, useEffect } from "react";
 
 import { useCookies } from "react-cookie";
 
 export const Header = () => {
-  const { ctx } = useContext(AuthContext);
+  const { ctx, setCtx } = useContext(AuthContext);
   const component = {
     null: <WhoAmIQuery />,
     auth: <AuthRedirectQuery />,
     logout: <LogoutQuery />,
-    known: <UserMenu login={ctx.login} onClick={useUserMenuOnClick()} />,
+    known: (
+      <UserMenu
+        login={ctx.email}
+        onClick={useUserMenuOnClick()}
+        channels={ctx.channels}
+        deleteChannel={useDeleteChannelClick(ctx, setCtx)}
+      />
+    ),
     anonymous: <Anonymous />,
   }[ctx.status];
 
@@ -31,10 +39,10 @@ const WhoAmIQuery = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!data || error) {
+      if (!data.email || error) {
         setCtx({ status: "anonymous" });
       } else {
-        setCtx({ status: "known", login: data });
+        setCtx({ status: "known", email: data.email, channels: data.channels });
       }
     }
   }, [setCtx, data, error, isLoading]);
@@ -58,18 +66,6 @@ const AuthRedirectQuery = () => {
     }
   }, [setCtx, data, error, isLoading]);
   return <GoogleButton disabled={true} />;
-};
-
-const useAuthOnClick = () => {
-  const { setCtx } = useContext(AuthContext);
-  return useCallback(() => setCtx({ status: "auth" }), [setCtx]);
-};
-
-const useGuestOnClick = () => {
-  const [, setCookie] = useCookies(["guest"]);
-  return useCallback(() => {
-    setCookie("guest", false);
-  }, [setCookie]);
 };
 
 const Anonymous = () => {
@@ -102,4 +98,37 @@ const LogoutQuery = () => {
 const useUserMenuOnClick = () => {
   const { setCtx } = useContext(AuthContext);
   return useCallback(() => setCtx({ status: "logout" }), [setCtx]);
+};
+
+const useAuthOnClick = () => {
+  const { setCtx } = useContext(AuthContext);
+  return useCallback(() => setCtx({ status: "auth" }), [setCtx]);
+};
+
+const useGuestOnClick = () => {
+  const [, setCookie] = useCookies(["guest"]);
+  return useCallback(() => {
+    setCookie("guest", false);
+  }, [setCookie]);
+};
+
+const useDeleteChannelClick = (ctx, setCtx) => {
+  const mutation = useMutation({
+    mutationFn: deleteChannel,
+    onSuccess: async (data, variables, context) => {
+      const channels = ctx.channels.map((e) => {
+        return {
+          id: e.id === variables.id ? null : e.id,
+          channel_type: e.channel_type,
+        };
+      });
+      setCtx({ ...ctx, channels: channels });
+    },
+  });
+  return useCallback(
+    (id) => {
+      mutation.mutate({ id: id });
+    },
+    [mutation],
+  );
 };

@@ -20,6 +20,7 @@ class Group(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     channel_id: Mapped[int] = mapped_column(ForeignKey("channel.id"))
+    channel: Mapped["Channel"] = relationship(back_populates="groups")
 
 
 class ChannelType(enum.Enum):
@@ -32,4 +33,4 @@ class Channel(Base):
     type: Mapped[ChannelType]
     key: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    groups: Mapped[List["Group"]] = relationship()
+    groups: Mapped[List["Group"]] = relationship(back_populates="channel")

@@ -8,7 +8,7 @@ export const loginRedirect = async () => {
 };
 
 export const getWhoAmi = async () => {
-  return await apiClient.get("auth/whoami").then((res) => res.data.email);
+  return await apiClient.get("auth/whoami").then((res) => res.data);
 };
 
 export const logout = async () => {
