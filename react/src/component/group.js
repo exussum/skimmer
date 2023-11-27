@@ -3,6 +3,19 @@ import { apiClient } from "../config";
 import { useRef, useCallback, useState } from "react";
 import { useQueryClient, useQuery, useMutation } from "react-query";
 import { Flowbite } from "flowbite-react";
+import { useTranslation } from "react-i18next";
+
+const FIELD_THEME = {
+  textInput: {
+    field: {
+      input: {
+        withAddon: {
+          off: "flex-1 rounded-l-lg",
+        },
+      },
+    },
+  },
+};
 
 export const Listing = (props) => {
   const items = props.data
@@ -20,30 +33,19 @@ export const Listing = (props) => {
     : [];
 
   const [value, setValue] = useState("");
-
-  const theme = {
-    textInput: {
-      field: {
-        input: {
-          withAddon: {
-            off: "flex-1 rounded-l-lg",
-          },
-        },
-      },
-    },
-  };
   const textInputRef = useRef(null);
+  const { t } = useTranslation();
 
   return (
     <div className="bg-menu flex flex-col w-80 p-2 rounded-lg">
       {items}
       <div className="flex-1 flex">
-        <Flowbite theme={{ theme: theme }}>
+        <Flowbite theme={{ theme: FIELD_THEME }}>
           <TextInput
             enabled={(!props.processing).toString()}
             className="flex-1"
             ref={textInputRef}
-            placeholder="New Group"
+            placeholder={t("New Group Placeholder")}
             onChange={useCallback(
               (r) => setValue(r.currentTarget.value),
               [setValue],
@@ -62,7 +64,7 @@ export const Listing = (props) => {
             [value, props, textInputRef],
           )}
         >
-          Add
+          {t("Add Group Submit")}
         </Button>
       </div>
     </div>

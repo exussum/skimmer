@@ -2,23 +2,37 @@ import { Flowbite, Modal, Dropdown } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 
+const THEME = {
+  modal: {
+    header: {
+      title: "text-white",
+    },
+    body: {
+      title: "text-white",
+    },
+    content: { inner: "bg-popup" },
+  },
+  dropdown: {
+    floating: {
+      arrow: {
+        style: {
+          auto: "bg-popup",
+        },
+      },
+      item: {
+        container: "bg-menu",
+        base: "flex items-center justify-start py-2 px-4 text-sm  w-full hover:bg-popup focus:bg-popup  focus:outline-none",
+      },
+      style: { auto: "bg-menu text-white" },
+    },
+  },
+};
+
 export const GuestUserWarning = (props) => {
   const { t } = useTranslation();
 
-  const theme = {
-    modal: {
-      header: {
-        title: "text-white",
-      },
-      body: {
-        title: "text-white",
-      },
-      content: { inner: "bg-popup" },
-    },
-  };
-
   return (
-    <Flowbite theme={{ theme: theme }}>
+    <Flowbite theme={{ theme: THEME }}>
       <Modal show={true} onClick={props.onClick}>
         <Modal.Header></Modal.Header>
         <Modal.Body>
@@ -35,22 +49,6 @@ export const GuestUserWarning = (props) => {
 
 export const UserMenu = (props) => {
   const { t } = useTranslation();
-  const theme = {
-    dropdown: {
-      floating: {
-        arrow: {
-          style: {
-            auto: "bg-popup",
-          },
-        },
-        item: {
-          container: "bg-menu",
-          base: "flex items-center justify-start py-2 px-4 text-sm  w-full hover:bg-popup focus:bg-popup  focus:outline-none",
-        },
-        style: { auto: "bg-menu text-white" },
-      },
-    },
-  };
 
   const channels = props.channels.map((e, i) => {
     return (
@@ -65,7 +63,7 @@ export const UserMenu = (props) => {
   });
 
   return (
-    <Flowbite theme={{ theme: theme }}>
+    <Flowbite theme={{ theme: THEME }}>
       <Dropdown inline label={props.login}>
         <Dropdown.Item key="logout" onClick={props.onClick}>
           <div>{t("Logout")}</div>
@@ -78,7 +76,9 @@ export const UserMenu = (props) => {
 
 const ChannelItem = (props) => {
   const { t } = useTranslation();
-  const action = props.id ? t("Remove Channel") : t("Add Channel");
+  const action = props.id
+    ? t("Remove Channel Action")
+    : t("Add Channel Action");
   const onClick = useCallback(() => {
     if (props.id) {
       props.deleteChannel(props.id);

@@ -1,9 +1,15 @@
 # login
 msgid "Contact the owner to be added"
-msgstr "Not much for you to see here. Contact the ower to be whitelisted!" 
+msgstr "Not much for you to see here. Contact the ower to be whitelisted!"
 
 msgid "Sign in with Google"
 msgstr "Sign in with Google"
 
 msgid "Logout"
 msgstr "Logout"
+
+msgid "New Group Placeholder"
+msgstr "New Group"
+
+msgid "Add Group Submit"
+msgstr "Add Group"
