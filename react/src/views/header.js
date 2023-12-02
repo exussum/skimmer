@@ -6,7 +6,7 @@ import { useContext, useCallback, useEffect } from "react";
 
 import { useCookies } from "react-cookie";
 
-export const Header = () => {
+export const Header = (props) => {
   const { ctx, setCtx } = useContext(AuthContext);
   const component = {
     null: <WhoAmIQuery />,
@@ -24,7 +24,7 @@ export const Header = () => {
   }[ctx.status];
 
   return (
-    <div className="flex">
+    <div className={`flex ${props.className}`}>
       <div className="flex-1">Skimmer</div>
       <div className="flex-none">{component}</div>
     </div>

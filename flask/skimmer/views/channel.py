@@ -5,7 +5,7 @@ bp = Blueprint("channel", __name__)
 
 
 @bp.route("/add_google")
-def start():
+def add_google():
     session["state"], url = auth.oauth_token_req()
     session["add_google"] = True
     return redirect(url)
@@ -16,3 +16,12 @@ def start():
 def delete_channel(user_id, id):
     channel.delete_channel(user_id, id)
     return "", 204
+
+
+@bp.route("/<id>", methods=["GET"])
+@flask.protect
+def get_channel(user_id, id):
+    return [
+        {"id": e.id, "from": e.sender, "date": e.date.isoformat(), "title": e.title}
+        for e in channel.fetch_channel(user_id, id)
+    ]

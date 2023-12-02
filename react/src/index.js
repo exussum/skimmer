@@ -1,10 +1,51 @@
+import "./index.css";
+import Backend from "i18next-http-backend";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
+import i18n from "i18next";
+import { AuthContext, useAuthState } from "./api/auth";
+import { SideNav } from "./views/sidenav";
 import { CookiesProvider } from "react-cookie";
-import App from "./App";
+import { Header } from "./views/header";
+import { Content } from "./views/content";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { initReactI18next } from "react-i18next";
+
+i18n
+  .use(initReactI18next)
+  .use(Backend)
+  .init({
+    fallbackLng: "en",
+    lng: "en",
+    ns: "ns",
+    backend: {
+      loadPath: "http://localhost:8000/i18n/get",
+    },
+  });
+
+const queryClient = new QueryClient();
+
+const App = () => {
+  const [ctx, setCtx] = useAuthState();
+  return (
+    <AuthContext.Provider value={{ ctx, setCtx }}>
+      <QueryClientProvider client={queryClient}>
+        <div className="h-screen flex flex-col mx-8 px-8 pt-8 bg-content rounded-l">
+          <Header className="basis-16 border-0 border-b-2 pb-8 border-solid border-b-menu" />
+          <div className="grow mt-8">
+            <div className="h-full flex flex-column">
+              <SideNav className="w-48 pr-8" />
+              <Content />
+            </div>
+          </div>
+        </div>
+      </QueryClientProvider>
+    </AuthContext.Provider>
+  );
+};
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
 root.render(
   <React.StrictMode>
     <CookiesProvider defaultSetOptions={{ path: "/" }}>
