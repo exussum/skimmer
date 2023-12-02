@@ -1,19 +1,36 @@
+import { useState, useEffect, useContext } from "react";
 import { useQuery } from "react-query";
-import { useState, useEffect } from "react";
 import { apiClient } from "../config";
+import { AuthContext } from "../api/auth";
 
 const getChannel = async ({ id }) => {
   return apiClient.get(`/channel/${id}`).then((r) => r.data);
 };
 
 export const Content = () => {
+  const { ctx } = useContext(AuthContext);
+  const channel =
+    ctx.selectedChannel ||
+    (ctx.subbedChannels.length && ctx.subbedChannels[0].id);
+
+  if (channel) {
+    return <LoadContent channel={channel} />;
+  } else {
+    return "";
+  }
+};
+
+const LoadContent = ({ selectedChannel }) => {
   const [items, setItems] = useState([]);
-  const { isLoading, data } = useQuery(["channel", 1], getChannel, {
-    cacheTime: 0,
-  });
+  const { isLoading, data, isError, error } = useQuery(
+    ["channel", selectedChannel],
+    getChannel,
+  );
 
   useEffect(() => {
     if (!isLoading && data) {
+      console.log("setting...");
+      console.log(isLoading, data, error, isError);
       setItems(data);
     } else {
       setItems([]);
@@ -25,7 +42,7 @@ export const Content = () => {
 
 const ChannelList = ({ data }) => {
   const contents = data.map((e) => (
-    <Item id={e.id} title={e.title} date={e.date} />
+    <Item key={`side-nav-channel-${e.id}`} title={e.title} date={e.date} />
   ));
   return (
     <div className="bg-menu flex-1 flex flex-col overflow-hidden">

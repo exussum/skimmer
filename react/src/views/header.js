@@ -33,16 +33,19 @@ export const Header = (props) => {
 
 const WhoAmIQuery = () => {
   const { setCtx } = useContext(AuthContext);
-  const { isLoading, data, error } = useQuery(["whoami"], getWhoAmi, {
-    cacheTime: 0,
-  });
+  const { isLoading, data, error } = useQuery(["whoami"], getWhoAmi);
 
   useEffect(() => {
     if (!isLoading) {
       if (!data.email || error) {
         setCtx({ status: "anonymous" });
       } else {
-        setCtx({ status: "known", email: data.email, channels: data.channels });
+        setCtx({
+          status: "known",
+          email: data.email,
+          channels: data.channels,
+          subbedChannels: data.channels.filter((e) => e.id),
+        });
       }
     }
   }, [setCtx, data, error, isLoading]);
@@ -50,11 +53,7 @@ const WhoAmIQuery = () => {
 
 const AuthRedirectQuery = () => {
   const { setCtx } = useContext(AuthContext);
-  const { isLoading, data, error } = useQuery(
-    ["loginRedirect"],
-    loginRedirect,
-    { cacheTime: 0 },
-  );
+  const { isLoading, data, error } = useQuery(["loginRedirect"], loginRedirect);
 
   useEffect(() => {
     if (!isLoading) {
@@ -83,7 +82,7 @@ const Anonymous = () => {
 const LogoutQuery = () => {
   const { setCtx } = useContext(AuthContext);
 
-  const { isLoading, isError } = useQuery(["logout"], logout, { cacheTime: 0 });
+  const { isLoading, isError } = useQuery(["logout"], logout);
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -118,11 +117,12 @@ const useDeleteChannelClick = (ctx, setCtx) => {
     onSuccess: async (data, variables, context) => {
       const channels = ctx.channels.map((e) => {
         return {
+          ...e,
           id: e.id === variables.id ? null : e.id,
-          channel_type: e.channel_type,
         };
       });
-      setCtx({ ...ctx, channels: channels });
+      const subbedChannels = channels.filter((e) => e.id);
+      setCtx({ ...ctx, channels: channels, subbedChannels: subbedChannels });
     },
   });
   return useCallback(

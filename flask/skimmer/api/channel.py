@@ -22,5 +22,5 @@ def fetch_channel(user_id, id):
     model = nt("model", "id date title sender")
     now = datetime.now()
     return [
-        model(1, now + timedelta(days=x), "I love you", "Melissa") for x in range(50)
+        model(x, now + timedelta(days=x), "I love you", "Melissa") for x in range(50)
     ]
