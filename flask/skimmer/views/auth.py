@@ -26,7 +26,7 @@ def code():
         add_google = session.get("add_google")
         session.clear()
 
-        email, key = submit_oauth_code(code)
+        email, access_token, refresh_token = submit_oauth_code(code)
 
         if id := id_for_email(email):
             session["email"] = email
@@ -35,7 +35,9 @@ def code():
             resp.set_cookie("guest", "false")
 
             if add_google:
-                create_or_update_channel(id, key, ChannelType.Google)
+                create_or_update_channel(
+                    id, access_token, refresh_token, ChannelType.Google
+                )
         else:
             resp.set_cookie("guest", "true")
     else:

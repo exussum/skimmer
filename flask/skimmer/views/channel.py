@@ -22,6 +22,6 @@ def delete_channel(user_id, id):
 @flask.protect
 def get_channel(user_id, id):
     return [
-        {"id": e.id, "from": e.sender, "date": e.date.isoformat(), "title": e.title}
-        for e in channel.fetch_channel(user_id, id)
+        {"id": e.id, "from": e.sender, "date": e.date, "title": e.title, "body": e.body}
+        for e in channel.fetch_messages(user_id, id)
     ]

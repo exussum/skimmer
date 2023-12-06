@@ -22,8 +22,12 @@ def oauth_token_req():
             ("client_id", Config.Google.GOOGLE_CLIENT_ID),
             ("redirect_uri", Config.Google.GOOGLE_REDIRECT_URL),
             ("response_type", "code"),
-            ("scope", "openid profile email"),
+            (
+                "scope",
+                "openid profile email https://www.googleapis.com/auth/gmail.readonly",
+            ),
             ("state", state),
+            ("access_type", "offline"),
         )
     )
     return state, urlunsplit(parts[:3] + (params,) + parts[4:])

@@ -31,6 +31,7 @@ class Channel(Base):
     __tablename__ = "channel"
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[ChannelType]
-    key: Mapped[str]
+    access_token: Mapped[str]
+    refresh_token: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     groups: Mapped[List["Group"]] = relationship(back_populates="channel")

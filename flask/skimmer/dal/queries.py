@@ -29,6 +29,14 @@ def fetch_groups(user_id, channel_id):
     )
 
 
+def fetch_channel(user_id, id):
+    return (
+        db.session.query(m.Channel)
+        .filter(m.Channel.user_id == user_id, m.Channel.id == id)
+        .one_or_none()
+    )
+
+
 def fetch_channels(user_id):
     return list(
         db.session.query(m.Channel.id, m.Channel.type).filter(
@@ -55,11 +63,19 @@ def delete_group(user_id, channel_id, id):
     session.commit()
 
 
-def create_or_update_channel(user_id, key, type):
+def create_or_update_channel(user_id, access_token, refresh_token, type):
     stmt = (
         insert(m.Channel)
-        .values(key=key, user_id=user_id, type=type)
-        .on_conflict_do_update(index_elements=["user_id", "type"], set_={"key": key})
+        .values(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user_id=user_id,
+            type=type,
+        )
+        .on_conflict_do_update(
+            index_elements=["user_id", "type"],
+            set_={"access_token": access_token, "refresh_token": refresh_token},
+        )
         .returning(column("id"))
     )
     result = session.execute(stmt).fetchone()
@@ -81,3 +97,11 @@ def delete_channel(user_id, id):
         delete(m.Channel).where(m.Channel.id == id, m.Channel.user_id == user_id)
     )
     session.commit()
+
+
+def fetch_channel_tokens(user_id, type):
+    return (
+        session.query(m.Channel.access_token, m.Channel.refresh_token)
+        .filter(m.Channel.user_id == user_id, m.Channel.type == type)
+        .one_or_none()
+    )

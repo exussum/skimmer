@@ -3,8 +3,8 @@ import { useQuery } from "react-query";
 import { apiClient } from "../config";
 import { AuthContext } from "../api/auth";
 
-const getChannel = async ({ id }) => {
-  return apiClient.get(`/channel/${id}`).then((r) => r.data);
+const getChannel = async ({ queryKey }) => {
+  return apiClient.get(`/channel/${queryKey[1]}`).then((r) => r.data);
 };
 
 export const Content = () => {
@@ -20,29 +20,27 @@ export const Content = () => {
   }
 };
 
-const LoadContent = ({ selectedChannel }) => {
+const LoadContent = ({ channel }) => {
   const [items, setItems] = useState([]);
   const { isLoading, data, isError, error } = useQuery(
-    ["channel", selectedChannel],
+    ["channel", channel],
     getChannel,
   );
 
   useEffect(() => {
     if (!isLoading && data) {
-      console.log("setting...");
-      console.log(isLoading, data, error, isError);
       setItems(data);
     } else {
       setItems([]);
     }
-  }, [items, data, setItems, isLoading]);
+  }, [data, setItems, isLoading]);
 
   return <ChannelList data={items} />;
 };
 
 const ChannelList = ({ data }) => {
   const contents = data.map((e) => (
-    <Item key={`side-nav-channel-${e.id}`} title={e.title} date={e.date} />
+    <Item key={`${e.id}`} from={e.from} title={e.title} date={e.date} />
   ));
   return (
     <div className="bg-menu flex-1 flex flex-col overflow-hidden">
@@ -51,14 +49,14 @@ const ChannelList = ({ data }) => {
   );
 };
 
-const Item = ({ id, title, date }) => {
+const Item = ({ id, from, title, date }) => {
   return (
     <div className="flex">
       <div className="flex-0 p-2">
         <input type="checkbox" />
       </div>
       <div className="basis-64 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-        This is from bob
+        {from}
       </div>
       <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
         {title}

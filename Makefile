@@ -1,5 +1,7 @@
 build:
 	docker compose build
+	docker compose up
+	$(MAKE) migrate
 
 clean:
 	docker compose down -v
