@@ -50,6 +50,8 @@ const ChannelList = ({ data }) => {
 };
 
 const Item = ({ id, from, title, date }) => {
+  const localDate = new Date(Number(date)).toLocaleString("en-US");
+
   return (
     <div className="flex">
       <div className="flex-0 p-2">
@@ -61,7 +63,7 @@ const Item = ({ id, from, title, date }) => {
       <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
         {title}
       </div>
-      <div className="basis-64 p-2">{date}</div>
+      <div className="basis-64 p-2">{localDate}</div>
     </div>
   );
 };

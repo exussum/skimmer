@@ -1,3 +1,5 @@
+from email.utils import parseaddr
+
 from flask import Blueprint, redirect, request, session
 from skimmer.api import auth, channel, flask
 
@@ -22,6 +24,17 @@ def delete_channel(user_id, id):
 @flask.protect
 def get_channel(user_id, id):
     return [
-        {"id": e.id, "from": e.sender, "date": e.date, "title": e.title, "body": e.body}
+        {
+            "id": e.id,
+            "from": _display_address(e.sender),
+            "date": e.date,
+            "title": e.title,
+            "body": e.body,
+        }
         for e in channel.fetch_messages(user_id, id)
     ]
+
+
+def _display_address(e):
+    result = parseaddr(e)
+    return next(e for e in result if e)
