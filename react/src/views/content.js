@@ -1,31 +1,102 @@
-import { useState, useEffect, useContext } from "react";
-import { useQuery } from "react-query";
-import { apiClient } from "../config";
+import { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { AuthContext } from "../api/auth";
-
-const getChannel = async ({ queryKey }) => {
-  return apiClient.get(`/channel/${queryKey[1]}`).then((r) => r.data);
-};
+import { addGroup, deleteGroup, fetchGroups } from "../api/group";
+import { getChannel } from "../api/channel";
+import { useQueryClient, useQuery, useMutation } from "react-query";
+import { MessageList } from "../component/channel";
+import { GroupManager } from "../component/group";
+import { useTranslation } from "react-i18next";
+import { Button } from "flowbite-react";
 
 export const Content = () => {
   const { ctx } = useContext(AuthContext);
-  const channel =
-    ctx.selectedChannel ||
-    (ctx.subbedChannels.length && ctx.subbedChannels[0].id);
+  const [visible, setVisible] = useState(false);
+  const dropDownRef = useRef(null);
+
+  const channel = ctx.selectedChannel || (ctx.subbedChannels.length && ctx.subbedChannels[0].id);
+
+  const { t } = useTranslation();
+
+  const dismiss = useCallback(
+    (e) => {
+      setVisible(dropDownRef.current.contains(e.target));
+    },
+    [dropDownRef, setVisible],
+  );
+  useEffect(() => {
+    document.body.addEventListener("click", dismiss);
+    return () => {
+      document.body.removeEventListener("click", dismiss);
+    };
+  }, [dismiss, setVisible]);
 
   if (channel) {
-    return <LoadContent channel={channel} />;
+    return (
+      <div className="flex-1 flex flex-col">
+        <div
+          ref={dropDownRef}
+          onClick={() => {
+            setVisible(true);
+          }}
+          className="w-min"
+        >
+          <Button className="bg-popup w-min whitespace-nowrap">{t("Show group manager")}</Button>
+          <div className={`relative ${visible ? "" : "hidden"}`}>
+            <LoadGroupManager channelId={channel} className="absolute border-2" />
+          </div>
+        </div>
+        <LoadContent channelId={channel} />
+      </div>
+    );
   } else {
     return "";
   }
 };
 
-const LoadContent = ({ channel }) => {
-  const [items, setItems] = useState([]);
-  const { isLoading, data, isError, error } = useQuery(
-    ["channel", channel],
-    getChannel,
+export const LoadGroupManager = ({ channelId, className }) => {
+  const [, setProcessing] = useState(false);
+  const key = ["groups", channelId];
+  const { isLoading, data } = useQuery(key, fetchGroups);
+  const queryClient = useQueryClient();
+
+  const addMutation = useMutation(addGroup, {
+    onSuccess: () => {
+      setProcessing(false);
+      queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+  const deleteMutation = useMutation(deleteGroup, {
+    onSuccess: () => {
+      setProcessing(false);
+      queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+
+  const stuff = (bigId, id) => {};
+
+  return (
+    <GroupManager
+      processing={isLoading}
+      data={data}
+      className={className}
+      selectGroup={(id) => stuff("select", id)}
+      deleteGroup={(id) => {
+        setProcessing(true);
+        deleteMutation.mutate({ channelId: channelId, id: id });
+      }}
+      addGroup={(name) => {
+        if (name) {
+          setProcessing(true);
+          addMutation.mutate({ channelId: channelId, name: name });
+        }
+      }}
+    />
   );
+};
+
+const LoadContent = ({ channelId }) => {
+  const [items, setItems] = useState([]);
+  const { isLoading, data } = useQuery(["channel", channelId], getChannel);
 
   useEffect(() => {
     if (!isLoading && data) {
@@ -35,35 +106,5 @@ const LoadContent = ({ channel }) => {
     }
   }, [data, setItems, isLoading]);
 
-  return <ChannelList data={items} />;
-};
-
-const ChannelList = ({ data }) => {
-  const contents = data.map((e) => (
-    <Item key={`${e.id}`} from={e.from} title={e.title} date={e.date} />
-  ));
-  return (
-    <div className="bg-menu flex-1 flex flex-col overflow-hidden">
-      {contents}
-    </div>
-  );
-};
-
-const Item = ({ id, from, title, date }) => {
-  const localDate = new Date(Number(date)).toLocaleString("en-US");
-
-  return (
-    <div className="flex">
-      <div className="flex-0 p-2">
-        <input type="checkbox" />
-      </div>
-      <div className="basis-64 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-        {from}
-      </div>
-      <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-        {title}
-      </div>
-      <div className="basis-64 p-2">{localDate}</div>
-    </div>
-  );
+  return <MessageList data={items} />;
 };

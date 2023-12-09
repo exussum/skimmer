@@ -4,9 +4,6 @@ import { useCallback } from "react";
 
 const THEME = {
   modal: {
-    header: {
-      title: "text-white",
-    },
     body: {
       title: "text-white",
     },
@@ -19,6 +16,7 @@ const THEME = {
           auto: "bg-popup",
         },
       },
+      divider: "my-1 h-px bg-popup",
       item: {
         container: "bg-menu",
         base: "flex items-center justify-start py-2 px-4 text-sm  w-full hover:bg-popup focus:bg-popup  focus:outline-none",
@@ -34,12 +32,9 @@ export const GuestUserWarning = (props) => {
   return (
     <Flowbite theme={{ theme: THEME }}>
       <Modal show={true} onClick={props.onClick}>
-        <Modal.Header></Modal.Header>
         <Modal.Body>
           <div className="space-y-6">
-            <p className="text-base leading-relaxed">
-              {t("Contact the owner to be added")}
-            </p>
+            <p className="text-base leading-relaxed">{t("Contact the owner to be added")}</p>
           </div>
         </Modal.Body>
       </Modal>
@@ -65,10 +60,11 @@ export const UserMenu = (props) => {
   return (
     <Flowbite theme={{ theme: THEME }}>
       <Dropdown inline label={props.login}>
+        {channels}
+        <Dropdown.Divider />
         <Dropdown.Item key="logout" onClick={props.onClick}>
           <div>{t("Logout")}</div>
         </Dropdown.Item>
-        {channels}
       </Dropdown>
     </Flowbite>
   );
@@ -76,9 +72,7 @@ export const UserMenu = (props) => {
 
 const ChannelItem = (props) => {
   const { t } = useTranslation();
-  const action = props.id
-    ? t("Remove Channel Action")
-    : t("Add Channel Action");
+  const action = props.id ? t("Remove Channel Action") : t("Add Channel Action");
   const onClick = useCallback(() => {
     if (props.id) {
       props.deleteChannel(props.id);

@@ -8,6 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from skimmer.db import Base
 
+SYSTEM_GROUP_GENERAL = "General"
+
 
 class User(Base):
     __tablename__ = "user"
@@ -21,6 +23,7 @@ class Group(Base):
     name: Mapped[str]
     channel_id: Mapped[int] = mapped_column(ForeignKey("channel.id"))
     channel: Mapped["Channel"] = relationship(back_populates="groups")
+    system: Mapped[bool]
 
 
 class ChannelType(enum.Enum):

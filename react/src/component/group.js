@@ -1,7 +1,5 @@
 import { Button, TextInput } from "flowbite-react";
-import { apiClient } from "../config";
 import { useRef, useCallback, useState } from "react";
-import { useQueryClient, useQuery, useMutation } from "react-query";
 import { Flowbite } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +15,7 @@ const FIELD_THEME = {
   },
 };
 
-export const Listing = (props) => {
+export const GroupManager = (props) => {
   const items = props.data
     ? props.data.map((item, i) => {
         return (
@@ -37,7 +35,7 @@ export const Listing = (props) => {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-menu flex flex-col w-80 p-2 rounded-lg">
+    <div className={`bg-menu flex flex-col w-80 p-2 rounded-lg ${props.className}`}>
       {items}
       <div className="flex-1 flex">
         <Flowbite theme={{ theme: FIELD_THEME }}>
@@ -46,10 +44,7 @@ export const Listing = (props) => {
             className="flex-1"
             ref={textInputRef}
             placeholder={t("New Group Placeholder")}
-            onChange={useCallback(
-              (r) => setValue(r.currentTarget.value),
-              [setValue],
-            )}
+            onChange={useCallback((r) => setValue(r.currentTarget.value), [setValue])}
           />
         </Flowbite>
         <Button
@@ -73,14 +68,8 @@ export const Listing = (props) => {
 
 const ListItem = (props) => {
   const { itemId, selectGroup, deleteGroup } = props;
-  const selectCallback = useCallback(
-    () => selectGroup(itemId),
-    [itemId, selectGroup],
-  );
-  const deleteCallback = useCallback(
-    () => deleteGroup(itemId),
-    [itemId, deleteGroup],
-  );
+  const selectCallback = useCallback(() => selectGroup(itemId), [itemId, selectGroup]);
+  const deleteCallback = useCallback(() => deleteGroup(itemId), [itemId, deleteGroup]);
   return (
     <div className="flow-initial">
       <div className="flex items-center">
@@ -92,64 +81,5 @@ const ListItem = (props) => {
         </Button>
       </div>
     </div>
-  );
-};
-
-export const fetchGroups = async ({ queryKey }) => {
-  const [, channelId] = queryKey;
-  return apiClient.get(`/group/${channelId}`).then((res) => res.data);
-};
-
-export const addGroup = async ({ name, channelId }) => {
-  const params = new URLSearchParams({
-    name: name,
-  });
-  return apiClient.post(`/group/${channelId}`, params, {
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-  });
-};
-
-export const deleteGroup = async ({ channelId, id }) => {
-  return apiClient.delete(`/group/${channelId}/${id}`);
-};
-
-export const Go = (props) => {
-  const channelId = props.channelId;
-  const [, setProcessing] = useState(false);
-  const key = ["groups", channelId];
-  const { isLoading, data } = useQuery(key, fetchGroups);
-  const queryClient = useQueryClient();
-
-  const addMutation = useMutation(addGroup, {
-    onSuccess: () => {
-      setProcessing(false);
-      queryClient.invalidateQueries({ queryKey: key });
-    },
-  });
-  const deleteMutation = useMutation(deleteGroup, {
-    onSuccess: () => {
-      setProcessing(false);
-      queryClient.invalidateQueries({ queryKey: key });
-    },
-  });
-
-  const stuff = (bigId, id) => {};
-
-  return (
-    <Listing
-      processing={isLoading}
-      data={data}
-      selectGroup={(id) => stuff("select", id)}
-      deleteGroup={(id) => {
-        setProcessing(true);
-        deleteMutation.mutate({ channelId: channelId, id: id });
-      }}
-      addGroup={(name) => {
-        if (name) {
-          setProcessing(true);
-          addMutation.mutate({ channelId: channelId, name: name });
-        }
-      }}
-    />
   );
 };

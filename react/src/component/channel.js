@@ -4,12 +4,7 @@ import { useCallback } from "react";
 
 export const ChannelNav = ({ channels, className, onSelect }) => {
   const buttons = channels.map((e) => (
-    <Channel
-      key={e.id}
-      channel_type={e.channel_type}
-      id={e.id}
-      onClick={onSelect}
-    />
+    <Channel key={e.id} channel_type={e.channel_type} id={e.id} onClick={onSelect} />
   ));
 
   const { t } = useTranslation();
@@ -33,13 +28,29 @@ const Channel = ({ id, channel_type, onClick }) => {
   );
   return (
     <li key={id}>
-      <Button
-        onClick={click}
-        className="block w-full bg-menu text-left"
-        value={id}
-      >
+      <Button onClick={click} className="block w-full bg-menu text-left" value={id}>
         <div className="min-w-full">{channel_type}</div>
       </Button>
     </li>
+  );
+};
+
+export const MessageList = ({ data }) => {
+  const contents = data.map((e) => <Item key={`${e.id}`} from={e.from} title={e.title} date={e.date} />);
+  return <div className="bg-menu flex-1 flex flex-col overflow-hidden">{contents}</div>;
+};
+
+const Item = ({ id, from, title, date }) => {
+  const localDate = new Date(Number(date)).toLocaleString("en-US");
+
+  return (
+    <div className="flex">
+      <div className="flex-0 p-2">
+        <input type="checkbox" />
+      </div>
+      <div className="basis-64 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
+      <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{title}</div>
+      <div className="basis-64 p-2">{localDate}</div>
+    </div>
   );
 };

@@ -26,15 +26,10 @@ def get_channel(user_id, id):
     return [
         {
             "id": e.id,
-            "from": _display_address(e.sender),
+            "from": next(e for e in parseaddr(e.sender) if e),
             "date": e.date,
             "title": e.title,
             "body": e.body,
         }
         for e in channel.fetch_messages(user_id, id)
     ]
-
-
-def _display_address(e):
-    result = parseaddr(e)
-    return next(e for e in result if e)

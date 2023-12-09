@@ -45,8 +45,8 @@ def fetch_channels(user_id):
     )
 
 
-def add_group(user_id, channel_id, name):
-    session.add(m.Group(channel_id=channel_id, name=name))
+def add_group(user_id, channel_id, name, system=False):
+    session.add(m.Group(channel_id=channel_id, name=name, system=system))
     session.commit()
 
 
@@ -54,6 +54,7 @@ def delete_group(user_id, channel_id, id):
     session.execute(
         delete(m.Group).where(
             m.Group.id == id,
+            m.Group.system == False,
             m.Group.channel_id
             == select(m.Channel.id)
             .where(m.Channel.id == channel_id, m.Channel.user_id == user_id)
@@ -93,6 +94,10 @@ def delete_channel(user_id, id):
             .scalar_subquery()
         )
     )
+    session.commit()
+
+
+def delete_groups(user_id, channel_id):
     session.execute(
         delete(m.Channel).where(m.Channel.id == id, m.Channel.user_id == user_id)
     )
