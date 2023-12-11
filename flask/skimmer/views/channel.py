@@ -25,11 +25,11 @@ def delete_channel(user_id, id):
 def get_channel(user_id, id):
     return [
         {
-            "id": e.id,
-            "from": next(e for e in parseaddr(e.sender) if e),
-            "sent": e.sent.isoformat(),
-            "subject": e.subject,
-            "body": e.body,
+            "id": id,
+            "from": next(e for e in parseaddr(sender) if e),
+            "sent": sent.isoformat(),
+            "subject": subject,
+            "body": body,
         }
-        for e in channel.fetch_messages(user_id, id)
+        for (id, sent, sender, subject, body) in channel.fetch_messages(user_id, id)
     ]

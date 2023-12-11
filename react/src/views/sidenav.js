@@ -13,6 +13,6 @@ export const SideNav = (props) => {
 
 const useChannel = (ctx, setCtx) => {
   return (e) => {
-    setCtx({ ...ctx, selectedChannel: e });
+    setCtx({ ...ctx, selectedChannelId: e });
   };
 };

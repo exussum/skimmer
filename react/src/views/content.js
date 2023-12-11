@@ -44,16 +44,16 @@ export const Content = () => {
     e.stopPropagation();
   };
 
-  if (ctx.selectedChannel) {
+  if (ctx.selectedChannelId) {
     return (
       <div className="flex-1 flex flex-col">
         <Button onClick={click} className="bg-popup w-min whitespace-nowrap">
           {t("Show group manager")}
         </Button>
         <NonButtonDropDown visible={visible} setVisible={setVisible}>
-          <LoadGroupManager channelId={ctx.selectedChannel.id} className="border-2" />
+          <LoadGroupManager channelId={ctx.selectedChannelId} className="border-2" />
         </NonButtonDropDown>
-        <LoadContent channelId={ctx.selectedChannel.id} />
+        <LoadContent channelId={ctx.selectedChannelId} />
       </div>
     );
   } else {

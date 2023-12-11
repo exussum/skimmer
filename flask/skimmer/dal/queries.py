@@ -86,12 +86,18 @@ def create_or_update_channel(user_id, access_token, refresh_token, type):
 
 
 def delete_channel(user_id, id):
+    session.query(m.Channel).filter(
+        m.Channel.user_id == user_id, m.Channel.id == id
+    ).delete()
+    session.commit()
+
+
+def delete_messages(user_id, channel_id):
     session.execute(
-        delete(m.Group).where(
-            m.Group.channel_id
-            == select(m.Channel.id)
-            .where(m.Channel.id == id, m.Channel.user_id == user_id)
-            .scalar_subquery()
+        delete(m.Message).where(
+            m.Group.id == m.Message.group_id,
+            m.Group.channel_id == channel_id,
+            m.Channel.user_id == user_id,
         )
     )
     session.commit()
@@ -99,7 +105,13 @@ def delete_channel(user_id, id):
 
 def delete_groups(user_id, channel_id):
     session.execute(
-        delete(m.Channel).where(m.Channel.id == id, m.Channel.user_id == user_id)
+        delete(m.Group).where(
+            m.Group.channel_id.in_(
+                session.query(m.Channel.id)
+                .filter(m.Channel.id == channel_id, m.Channel.user_id == user_id)
+                .subquery()
+            )
+        )
     )
     session.commit()
 
@@ -109,6 +121,22 @@ def fetch_channel_tokens(user_id, type):
         session.query(m.Channel.access_token, m.Channel.refresh_token)
         .filter(m.Channel.user_id == user_id, m.Channel.type == type)
         .one_or_none()
+    )
+
+
+def fetch_messages(user_id, channel_id):
+    return (
+        session.query(
+            m.Message.id,
+            m.Message.sent,
+            m.Message.sender,
+            m.Message.subject,
+            m.Message.body,
+        )
+        .join(m.Message.group)
+        .join(m.Group.channel)
+        .filter(m.Channel.user_id == user_id, channel_id == m.Channel.id)
+        .order_by(m.Message.sent.desc())
     )
 
 

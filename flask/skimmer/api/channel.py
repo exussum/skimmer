@@ -9,8 +9,10 @@ from skimmer.dal.queries import (
     create_or_update_channel as create_or_update_channel_query,
     delete_channel as delete_channel_query,
     delete_groups,
+    delete_messages,
     fetch_channel,
     fetch_channels as fetch_channels_query,
+    fetch_messages,
     message_handler,
 )
 
@@ -18,7 +20,6 @@ _TYPE_TO_PATH = {ChannelType.Google: Config.Channel.CHANNEL_GOOGLE_REDIRECT_URL}
 _CHANNEL_TYPE_TO_DAL = {ChannelType.Google: google_fetch_messages}
 
 ChannelSub = nt("ChannelResult", "id channel_type add_path")
-MessageModel = nt("MessageModel", "id sent sender subject body")
 
 
 def create_or_update_channel(user_id, access_token, refresh_token, type):
@@ -35,21 +36,22 @@ def fetch_channels(user_id):
     return [ChannelSub(v, k.value, _TYPE_TO_PATH[k]) for (k, v) in result.items()]
 
 
-def fetch_messages(user_id, id):
-    f = _CHANNEL_TYPE_TO_DAL[fetch_channel(user_id, id).type]
-    result = [MessageModel(*x) for x in f(user_id)]
-    with message_handler(user_id) as mh:
-        for e in result:
-            mh.add(
-                external_id=e.id,
-                sent=e.sent,
-                sender=e.sender,
-                subject=e.subject,
-                body=e.body,
-            )
-    return result
+def update_messages_from_service(user_id, id):
+    channel = fetch_channel(user_id, id)
+    if channel:
+        f = _CHANNEL_TYPE_TO_DAL[channel.type]
+        with message_handler(user_id) as mh:
+            for (id, sent, sender, subject, body) in f(user_id):
+                mh.add(
+                    external_id=e.id,
+                    sent=e.sent,
+                    sender=e.sender,
+                    subject=e.subject,
+                    body=e.body,
+                )
 
 
 def delete_channel(user_id, id):
+    delete_messages(user_id, id)
     delete_groups(user_id, id)
     delete_channel_query(user_id, id)

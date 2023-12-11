@@ -45,7 +45,7 @@ const WhoAmIQuery = () => {
           status: "known",
           email: data.email,
           channels: data.channels,
-          selectedChannel: activeChannels && activeChannels[0],
+          selectedChannelId: activeChannels.length && activeChannels[0].id,
           subbedChannels: activeChannels,
         });
       }
@@ -122,7 +122,13 @@ const useDeleteChannelClick = (ctx, setCtx) => {
           id: e.id === variables.id ? null : e.id,
         };
       });
+
       const subbedChannels = channels.filter((e) => e.id);
+
+      if (ctx.selectedChannelId === variables.id) {
+        ctx.selectedChannelId = subbedChannels.length && subbedChannels[0].id;
+      }
+
       setCtx({ ...ctx, channels: channels, subbedChannels: subbedChannels });
     },
   });
