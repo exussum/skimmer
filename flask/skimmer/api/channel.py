@@ -4,19 +4,21 @@ from datetime import datetime, timedelta
 from skimmer.config import Config
 from skimmer.dal.google import fetch_messages as google_fetch_messages
 from skimmer.dal.models import SYSTEM_GROUP_GENERAL, ChannelType
-from skimmer.dal.queries import add_group
 from skimmer.dal.queries import (
+    add_group,
     create_or_update_channel as create_or_update_channel_query,
+    delete_channel as delete_channel_query,
+    delete_groups,
+    fetch_channel,
+    fetch_channels as fetch_channels_query,
+    message_handler,
 )
-from skimmer.dal.queries import delete_channel as delete_channel_query
-from skimmer.dal.queries import delete_groups, fetch_channel
-from skimmer.dal.queries import fetch_channels as fetch_channels_query
 
 _TYPE_TO_PATH = {ChannelType.Google: Config.Channel.CHANNEL_GOOGLE_REDIRECT_URL}
 _CHANNEL_TYPE_TO_DAL = {ChannelType.Google: google_fetch_messages}
 
 ChannelSub = nt("ChannelResult", "id channel_type add_path")
-MessageModel = nt("MessageModel", "id date sender title body")
+MessageModel = nt("MessageModel", "id sent sender subject body")
 
 
 def create_or_update_channel(user_id, access_token, refresh_token, type):
@@ -35,7 +37,17 @@ def fetch_channels(user_id):
 
 def fetch_messages(user_id, id):
     f = _CHANNEL_TYPE_TO_DAL[fetch_channel(user_id, id).type]
-    return [MessageModel(*x) for x in f(user_id)]
+    result = [MessageModel(*x) for x in f(user_id)]
+    with message_handler(user_id) as mh:
+        for e in result:
+            mh.add(
+                external_id=e.id,
+                sent=e.sent,
+                sender=e.sender,
+                subject=e.subject,
+                body=e.body,
+            )
+    return result
 
 
 def delete_channel(user_id, id):

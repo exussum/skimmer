@@ -1,4 +1,5 @@
 import string
+from datetime import datetime
 
 import jwt
 import requests
@@ -54,7 +55,7 @@ class _FetchMessages:
     def __call__(self, id, resp, exc):
         self.result[id] = (
             resp["id"],
-            resp["internalDate"],
+            datetime.fromtimestamp(int(resp["internalDate"]) / 1000),
             self._header("From", resp),
             self._header("Subject", resp),
             resp["snippet"],

@@ -17,7 +17,7 @@ repos:
     hooks:
       - id: isort
         name: isort (python)
-        args: ["--profile", "black", "-p", "skimmer"]
+        args: ["--profile", "black", "-p", "skimmer", "--ca"]
   - repo: local
     hooks:
       - id: js

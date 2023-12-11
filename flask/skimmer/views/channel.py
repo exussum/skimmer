@@ -27,8 +27,8 @@ def get_channel(user_id, id):
         {
             "id": e.id,
             "from": next(e for e in parseaddr(e.sender) if e),
-            "date": e.date,
-            "title": e.title,
+            "sent": e.sent.isoformat(),
+            "subject": e.subject,
             "body": e.body,
         }
         for e in channel.fetch_messages(user_id, id)

@@ -23,6 +23,7 @@ export const GroupManager = (props) => {
             key={i}
             itemId={item.id}
             itemName={item.name}
+            isSystem={item.system}
             selectGroup={props.selectGroup}
             deleteGroup={props.deleteGroup}
           />
@@ -67,18 +68,22 @@ export const GroupManager = (props) => {
 };
 
 const ListItem = (props) => {
-  const { itemId, selectGroup, deleteGroup } = props;
+  const { itemId, isSystem, selectGroup, deleteGroup } = props;
   const selectCallback = useCallback(() => selectGroup(itemId), [itemId, selectGroup]);
   const deleteCallback = useCallback(() => deleteGroup(itemId), [itemId, deleteGroup]);
   return (
     <div className="flow-initial">
       <div className="flex items-center">
-        <div className="flex-1" onClick={selectCallback}>
+        <div className="flex-1 py-2" onClick={selectCallback}>
           {props.itemName}
         </div>
-        <Button className="flex-initial" onClick={deleteCallback}>
-          x
-        </Button>
+        {isSystem ? (
+          ""
+        ) : (
+          <Button className="flex-initial" onClick={deleteCallback}>
+            x
+          </Button>
+        )}
       </div>
     </div>
   );

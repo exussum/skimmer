@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import Enum, ForeignKey
@@ -24,6 +25,7 @@ class Group(Base):
     channel_id: Mapped[int] = mapped_column(ForeignKey("channel.id"))
     channel: Mapped["Channel"] = relationship(back_populates="groups")
     system: Mapped[bool]
+    messages: Mapped[List["Message"]] = relationship(back_populates="group")
 
 
 class ChannelType(enum.Enum):
@@ -38,3 +40,15 @@ class Channel(Base):
     refresh_token: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     groups: Mapped[List["Group"]] = relationship(back_populates="channel")
+
+
+class Message(Base):
+    __tablename__ = "message"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sent: Mapped[datetime]
+    sender: Mapped[str]
+    external_id: Mapped[str]
+    subject: Mapped[str]
+    body: Mapped[str]
+    group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
+    group: Mapped["Group"] = relationship(back_populates="messages")

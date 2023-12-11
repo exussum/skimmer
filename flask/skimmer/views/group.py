@@ -8,8 +8,8 @@ bp = Blueprint("group", __name__)
 @flask.protect
 def fetch_groups(user_id, channel_id):
     return [
-        {"id": id, "name": name}
-        for (id, name) in group.fetch_groups(user_id, channel_id)
+        {"id": id, "name": name, "system": system}
+        for (id, name, system) in group.fetch_groups(user_id, channel_id)
     ]
 
 

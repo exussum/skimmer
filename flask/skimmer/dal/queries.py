@@ -22,7 +22,7 @@ def add_user(email):
 
 def fetch_groups(user_id, channel_id):
     return list(
-        db.session.query(m.Group.id, m.Group.name)
+        db.session.query(m.Group.id, m.Group.name, m.Group.system)
         .filter(m.Group.channel_id == channel_id, m.Channel.user_id == user_id)
         .join(m.Channel.groups)
         .all()
@@ -74,7 +74,7 @@ def create_or_update_channel(user_id, access_token, refresh_token, type):
             type=type,
         )
         .on_conflict_do_update(
-            index_elements=["user_id", "type"],
+            index_elements=[m.Channel.user_id, m.Channel.type],
             set_={"access_token": access_token, "refresh_token": refresh_token},
         )
         .returning(column("id"))
@@ -110,3 +110,53 @@ def fetch_channel_tokens(user_id, type):
         .filter(m.Channel.user_id == user_id, m.Channel.type == type)
         .one_or_none()
     )
+
+
+class message_handler:
+    def __init__(self, user_id):
+        self.rows = []
+        self.user_id = user_id
+
+    def __enter__(self):
+        self.default_group = (
+            session.query(m.Group.id)
+            .join(m.Group.channel)
+            .filter(
+                m.Channel.user_id == self.user_id,
+                m.Group.name == m.SYSTEM_GROUP_GENERAL,
+            )
+            .first()[0]
+        )
+        return self
+
+    def add(self, external_id, subject, sender, body, sent):
+        self.rows.append(
+            {
+                "sender": sender,
+                "external_id": external_id,
+                "subject": subject,
+                "body": body,
+                "sent": sent,
+                "group_id": self.default_group,
+            }
+        )
+
+    def __exit__(self, *args, **kwargs):
+        ids = set(
+            (
+                e[0]
+                for e in session.query(m.Message.external_id)
+                .join(m.Message.group)
+                .join(m.Group.channel)
+                .filter(
+                    m.Message.external_id.in_(
+                        (e["external_id"] for e in self.rows),
+                    ),
+                    m.Channel.user_id == self.user_id,
+                )
+            )
+        )
+        self.rows = [e for e in self.rows if e["external_id"] not in ids]
+        if self.rows:
+            session.execute(insert(m.Message), self.rows)
+            session.commit()

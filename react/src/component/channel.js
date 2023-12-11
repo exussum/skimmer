@@ -36,12 +36,12 @@ const Channel = ({ id, channel_type, onClick }) => {
 };
 
 export const MessageList = ({ data }) => {
-  const contents = data.map((e) => <Item key={`${e.id}`} from={e.from} title={e.title} date={e.date} />);
+  const contents = data.map((e) => <Item key={`${e.id}`} from={e.from} subject={e.subject} sent={e.sent} />);
   return <div className="bg-menu flex-1 flex flex-col overflow-hidden">{contents}</div>;
 };
 
-const Item = ({ id, from, title, date }) => {
-  const localDate = new Date(Number(date)).toLocaleString("en-US");
+const Item = ({ id, from, subject, sent }) => {
+  const localDate = new Date(sent).toLocaleString("en-US");
 
   return (
     <div className="flex">
@@ -49,7 +49,7 @@ const Item = ({ id, from, title, date }) => {
         <input type="checkbox" />
       </div>
       <div className="basis-64 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
-      <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{title}</div>
+      <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{subject}</div>
       <div className="basis-64 p-2">{localDate}</div>
     </div>
   );
