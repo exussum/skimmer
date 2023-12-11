@@ -40,11 +40,13 @@ const WhoAmIQuery = () => {
       if (!data.email || error) {
         setCtx({ status: "anonymous" });
       } else {
+        const activeChannels = data.channels.filter((e) => e.id);
         setCtx({
           status: "known",
           email: data.email,
           channels: data.channels,
-          subbedChannels: data.channels.filter((e) => e.id),
+          selectedChannel: activeChannels && activeChannels[0],
+          subbedChannels: activeChannels,
         });
       }
     }

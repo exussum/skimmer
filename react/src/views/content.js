@@ -8,44 +8,52 @@ import { GroupManager } from "../component/group";
 import { useTranslation } from "react-i18next";
 import { Button } from "flowbite-react";
 
-export const Content = () => {
-  const { ctx } = useContext(AuthContext);
-  const [visible, setVisible] = useState(false);
+export const NonButtonDropDown = (props) => {
   const dropDownRef = useRef(null);
-
-  const channel = ctx.selectedChannel || (ctx.subbedChannels.length && ctx.subbedChannels[0].id);
-
-  const { t } = useTranslation();
 
   const dismiss = useCallback(
     (e) => {
-      setVisible(dropDownRef.current.contains(e.target));
+      props.setVisible(dropDownRef.current.contains(e.target));
     },
-    [dropDownRef, setVisible],
+    [dropDownRef, props],
   );
+
   useEffect(() => {
     document.body.addEventListener("click", dismiss);
     return () => {
       document.body.removeEventListener("click", dismiss);
     };
-  }, [dismiss, setVisible]);
+  }, [dismiss]);
 
-  if (channel) {
+  return (
+    <div ref={dropDownRef}>
+      <div className={`relative ${props.visible ? "" : "hidden"} w-min`}>
+        <div className="absolute">{props.children}</div>
+      </div>
+    </div>
+  );
+};
+
+export const Content = () => {
+  const { ctx } = useContext(AuthContext);
+  const { t } = useTranslation();
+
+  const [visible, setVisible] = useState(false);
+  const click = (e) => {
+    setVisible(!visible);
+    e.stopPropagation();
+  };
+
+  if (ctx.selectedChannel) {
     return (
       <div className="flex-1 flex flex-col">
-        <div
-          ref={dropDownRef}
-          onClick={() => {
-            setVisible(true);
-          }}
-          className="w-min"
-        >
-          <Button className="bg-popup w-min whitespace-nowrap">{t("Show group manager")}</Button>
-          <div className={`relative ${visible ? "" : "hidden"}`}>
-            <LoadGroupManager channelId={channel} className="absolute border-2" />
-          </div>
-        </div>
-        <LoadContent channelId={channel} />
+        <Button onClick={click} className="bg-popup w-min whitespace-nowrap">
+          {t("Show group manager")}
+        </Button>
+        <NonButtonDropDown visible={visible} setVisible={setVisible}>
+          <LoadGroupManager channelId={ctx.selectedChannel.id} className="border-2" />
+        </NonButtonDropDown>
+        <LoadContent channelId={ctx.selectedChannel.id} />
       </div>
     );
   } else {
