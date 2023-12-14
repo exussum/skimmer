@@ -7,3 +7,16 @@ export const apiClient = axios.create({
   headers: { "Content-type": "application/json" },
   withCredentials: true,
 });
+
+apiClient.interceptors.response.use(
+  (e) => {
+    return e;
+  },
+  (e) => {
+    if (401 === e.response.status) {
+      window.location.reload();
+    } else {
+      return Promise.reject(e);
+    }
+  },
+);

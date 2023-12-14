@@ -36,18 +36,18 @@ def fetch_channels(user_id):
     return [ChannelSub(v, k.value, _TYPE_TO_PATH[k]) for (k, v) in result.items()]
 
 
-def update_messages_from_service(user_id, id):
-    channel = fetch_channel(user_id, id)
+def update_messages_from_service(channel_id):
+    channel = fetch_channel(channel_id)
     if channel:
         f = _CHANNEL_TYPE_TO_DAL[channel.type]
-        with message_handler(user_id) as mh:
-            for (id, sent, sender, subject, body) in f(user_id):
+        with message_handler(channel.user_id) as mh:
+            for (id, sent, sender, subject, body) in f(channel.user_id):
                 mh.add(
-                    external_id=e.id,
-                    sent=e.sent,
-                    sender=e.sender,
-                    subject=e.subject,
-                    body=e.body,
+                    external_id=id,
+                    sent=sent,
+                    sender=sender,
+                    subject=subject,
+                    body=body,
                 )
 
 

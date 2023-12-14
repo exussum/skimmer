@@ -1,20 +1,26 @@
 services:
-  be:
+  api:
     build: flask
     ports:
-      - "0.0.0.0:8000:5000"
+      - "8000:5000"
     volumes:
       - ./flask:/app
     env_file: flask/.env
+  worker:
+    build: worker
+    volumes:
+      - ./worker:/app
+    env_file: worker/.env
   fe:
+    image: skimmer-fe
     build: react
     volumes:
       - ./react:/app
     ports:
-      - "0.0.0.0:8080:3000"
+      - "8080:3000"
     env_file: react/.env
   db:
-    image: postgres:16.1 
+    image: postgres:16.1
     environment:
       POSTGRES_PASSWORD: skimmer
       POSTGRES_USER: skimmer
@@ -22,13 +28,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "0.0.0.0:5432:5432"
+      - "5432:5432"
   memcached:
     image: memcached:1.6.22-alpine
     command: ["-m", "4096"]
-    ports:  
-       - "11211:11211"  
- 
+    ports:
+       - "11211:11211"
+  rmq:
+    image:
+        rabbitmq:3.12.10-alpine
+    ports:
+        - "5672:5672"
 
 volumes:
   pgdata:

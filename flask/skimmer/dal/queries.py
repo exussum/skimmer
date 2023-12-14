@@ -29,12 +29,8 @@ def fetch_groups(user_id, channel_id):
     )
 
 
-def fetch_channel(user_id, id):
-    return (
-        db.session.query(m.Channel)
-        .filter(m.Channel.user_id == user_id, m.Channel.id == id)
-        .one_or_none()
-    )
+def fetch_channel(id):
+    return db.session.query(m.Channel).filter(m.Channel.id == id).one_or_none()
 
 
 def fetch_channels(user_id):

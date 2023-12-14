@@ -104,7 +104,7 @@ export const LoadGroupManager = ({ channelId, className }) => {
 
 const LoadContent = ({ channelId }) => {
   const [items, setItems] = useState([]);
-  const { isLoading, data } = useQuery(["channel", channelId], getChannel);
+  const { isLoading, data } = useQuery(["channel", channelId], getChannel, { refetchInterval: 6000 });
 
   useEffect(() => {
     if (!isLoading && data) {
