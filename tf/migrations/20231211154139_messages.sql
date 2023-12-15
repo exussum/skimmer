@@ -5,6 +5,7 @@ CREATE TABLE message (
     subject varchar NOT NULL,
     body boolean NOT NULL,
     sent timestamp NOT NULL,
+    hidden boolean NOT NULL,
     CONSTRAINT messages_pk PRIMARY KEY (id),
     CONSTRAINT messages_un UNIQUE (external_id, group_id)
 );

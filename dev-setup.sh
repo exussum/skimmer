@@ -33,4 +33,4 @@ docker compose build --no-cache
 docker compose up -d
 
 sleep 5
-make migrate translate
+make migrate

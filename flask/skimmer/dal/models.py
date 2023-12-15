@@ -50,5 +50,6 @@ class Message(Base):
     external_id: Mapped[str]
     subject: Mapped[str]
     body: Mapped[str]
+    hidden: Mapped[bool]
     group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
     group: Mapped["Group"] = relationship(back_populates="messages")

@@ -162,6 +162,7 @@ class message_handler:
                 "body": body,
                 "sent": sent,
                 "group_id": self.default_group,
+                "hidden": True,
             }
         )
 
