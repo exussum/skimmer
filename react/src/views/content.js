@@ -54,7 +54,7 @@ const LoadContent = ({ channelId }) => {
 
   if (channelResults.data && groupResults.data) {
     return (
-      <div className="p-2 flex-1 flex-col">
+      <div className="flex-1 flex-col">
         <Button
           variant="skimmer"
           onClick={(e) => {
@@ -89,12 +89,12 @@ const LoadContent = ({ channelId }) => {
     return (
       <div className="p-2 flex-1 flex-col bg-menu">
         <div>Loading:</div>
-        <ul class="list-inside">
-          <li class="flex items-center">
+        <ul className="list-inside">
+          <li className="flex items-center">
             <Loading value={groupResults.data} />
             Groups
           </li>
-          <li class="flex items-center">
+          <li className="flex items-center">
             <Loading value={channelResults.data} />
             Messages
           </li>

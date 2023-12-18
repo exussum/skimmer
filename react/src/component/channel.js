@@ -39,7 +39,7 @@ export const MessageList = ({ data, groups }) => {
   const contents = data.map((e) => (
     <Item groups={groups} key={`${e.id}`} from={e.from} subject={e.subject} sent={e.sent} />
   ));
-  return <div className="bg-menu flex-1 flex flex-col overflow-hidden">{contents}</div>;
+  return <div className="px-2 bg-menu flex-1 flex flex-col overflow-hidden">{contents}</div>;
 };
 
 const Item = ({ id, from, subject, sent, groups }) => {
@@ -56,7 +56,7 @@ const Item = ({ id, from, subject, sent, groups }) => {
       <div className="basis-64 py-2 pr-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
       <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{subject}</div>
       <div className="basis-64 p-2">{localDate}</div>
-      <select className="bg-menu py-2 pl-2">{selectItems}</select>
+      <select className="bg-menu py-2 p-2">{selectItems}</select>
     </div>
   );
 };

@@ -12,7 +12,7 @@ class Config:
         URL_AUTH = "https://accounts.google.com/o/oauth2/v2/auth"
 
     class Flask:
-        FLASK_SECRET_KEY = get("FLASK_SECRET_KEY") or "abc123"
+        FLASK_SECRET_KEY = get("FLASK_SECRET_KEY")
         FLASK_PERMANENT_SESSION_LIFETIME = int(
             get("FLASK_PERMANENT_SESSION_LIFETIME") or 0
         )
