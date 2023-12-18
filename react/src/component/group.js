@@ -1,19 +1,7 @@
-import { Button, TextInput } from "flowbite-react";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
 import { useRef, useCallback, useState } from "react";
-import { Flowbite } from "flowbite-react";
 import { useTranslation } from "react-i18next";
-
-const FIELD_THEME = {
-  textInput: {
-    field: {
-      input: {
-        withAddon: {
-          off: "flex-1 rounded-l-lg",
-        },
-      },
-    },
-  },
-};
 
 export const GroupManager = (props) => {
   const items = props.data
@@ -39,19 +27,19 @@ export const GroupManager = (props) => {
     <div className={`bg-menu flex flex-col w-80 p-2 rounded-lg ${props.className}`}>
       {items}
       <div className="flex-1 flex">
-        <Flowbite theme={{ theme: FIELD_THEME }}>
-          <TextInput
-            enabled={(!props.processing).toString()}
-            className="flex-1"
-            ref={textInputRef}
-            placeholder={t("New Group Placeholder")}
-            onChange={useCallback((r) => setValue(r.currentTarget.value), [setValue])}
-          />
-        </Flowbite>
+        <Form.Control
+          type="text"
+          enabled={(!props.processing).toString()}
+          className="flex-1"
+          ref={textInputRef}
+          placeholder={t("New Group Placeholder")}
+          onChange={useCallback((r) => setValue(r.currentTarget.value), [setValue])}
+        />
         <Button
           enabled={(!props.processing).toString()}
           color="{ props.processing ? 'dark' : 'black' }"
           className="flex-initial bg-popup rounded-none rounded-r-lg"
+          variant="skimmer"
           onClick={useCallback(
             (r) => {
               props.addGroup(value);

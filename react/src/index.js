@@ -1,3 +1,4 @@
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import Backend from "i18next-http-backend";
 import React from "react";
@@ -34,11 +35,10 @@ const App = () => {
     <AuthContext.Provider value={{ ctx, setCtx }}>
       <QueryClientProvider client={queryClient}>
         <div className="h-screen flex flex-col mx-8 px-8 pt-8 bg-content rounded-l">
-          <Header className="basis-16 border-0 border-b-2 pb-8 border-solid border-b-menu" />
+          <Header className="basis-16 border-0 border-b-2 border-solid border-b-menu" />
           {ctx.email ? (
-            <div className="grow mt-8">
-              {" "}
-              <div className="h-full flex flex-column">
+            <div className="grow">
+              <div className="h-full flex">
                 <SideNav className="w-48 pr-8" />
                 <Content />
               </div>

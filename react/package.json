@@ -3,18 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tailwindcss/forms": "0.5.7",
     "@tanstack/react-query": "5.8.2",
     "@testing-library/jest-dom": "5.14.1",
     "@testing-library/react": "13.0.0",
     "@testing-library/user-event": "13.2.1",
     "autoprefixer": "10.4.16",
     "axios": "1.6.1",
-    "flowbite": "2.1.1",
-    "flowbite-react": "0.6.4",
+    "bootstrap": "5.3.2",
     "i18next": "23.2.3",
-    "i18next-http-backend": "^2.4.1",
+    "i18next-http-backend": "2.4.1",
     "postcss": "8.4.31",
     "react": "18.2.0",
+    "react-bootstrap": "2.9.1",
     "react-cookie": "6.1.1",
     "react-dom": "18.2.0",
     "react-i18next": "13.5.0",
@@ -48,8 +49,8 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "husky": "^8.0.3",
-    "prettier": "^3.1.0"
+    "@babel/plugin-proposal-private-property-in-object": "7.21.11",
+    "husky": "8.0.3",
+    "prettier": "3.1.0"
   }
 }

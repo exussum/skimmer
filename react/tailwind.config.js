@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const svgToDataUri = require('mini-svg-data-uri')
+
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -12,5 +14,4 @@ module.exports = {
       popup: "#F05941",
     },
   },
-  plugins: [require("flowbite/plugin")],
 };

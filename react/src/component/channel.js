@@ -1,4 +1,4 @@
-import { Button } from "flowbite-react";
+import Button from "react-bootstrap/Button";
 import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 
@@ -28,7 +28,7 @@ const Channel = ({ id, channel_type, onClick }) => {
   );
   return (
     <li key={id}>
-      <Button onClick={click} className="block w-full bg-menu text-left" value={id}>
+      <Button onClick={click} variant="skimmer" className="block w-full text-left" value={id}>
         <div className="min-w-full">{channel_type}</div>
       </Button>
     </li>

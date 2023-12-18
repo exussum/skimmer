@@ -1,44 +1,19 @@
-import { Flowbite, Modal, Dropdown } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
-
-const THEME = {
-  modal: {
-    body: {
-      title: "text-white",
-    },
-    content: { inner: "bg-popup" },
-  },
-  dropdown: {
-    floating: {
-      arrow: {
-        style: {
-          auto: "bg-popup",
-        },
-      },
-      divider: "my-1 h-px bg-popup",
-      item: {
-        container: "bg-menu",
-        base: "flex items-center justify-start py-2 px-4 text-sm  w-full hover:bg-popup focus:bg-popup  focus:outline-none",
-      },
-      style: { auto: "bg-menu text-white" },
-    },
-  },
-};
+import Modal from "react-bootstrap/Modal";
+import Dropdown from "react-bootstrap/Dropdown";
 
 export const GuestUserWarning = (props) => {
   const { t } = useTranslation();
 
   return (
-    <Flowbite theme={{ theme: THEME }}>
-      <Modal show={true} onClick={props.onClick}>
-        <Modal.Body>
-          <div className="space-y-6">
-            <p className="text-base leading-relaxed">{t("Contact the owner to be added")}</p>
-          </div>
-        </Modal.Body>
-      </Modal>
-    </Flowbite>
+    <Modal show={true} onHide={props.onClick}>
+      <Modal.Body>
+        <div className="space-y-6">
+          <p className="text-base leading-relaxed">{t("Contact the owner to be added")}</p>
+        </div>
+      </Modal.Body>
+    </Modal>
   );
 };
 
@@ -58,15 +33,16 @@ export const UserMenu = (props) => {
   });
 
   return (
-    <Flowbite theme={{ theme: THEME }}>
-      <Dropdown inline label={props.login}>
+    <Dropdown>
+      <Dropdown.Toggle variant="skimmer">{props.login}</Dropdown.Toggle>
+      <Dropdown.Menu variant="skimmer">
         {channels}
         <Dropdown.Divider />
         <Dropdown.Item key="logout" onClick={props.onClick}>
           <div>{t("Logout")}</div>
         </Dropdown.Item>
-      </Dropdown>
-    </Flowbite>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 };
 
