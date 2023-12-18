@@ -13,3 +13,12 @@ msgstr "New Group"
 
 msgid "Add Group Submit"
 msgstr "Add Group"
+
+msgid "Channels Title"
+msgstr "Channels"
+
+msgid "Show group manager"
+msgstr "Groups"
+
+msgid "Remove Channel Action"
+msgstr "Remove Channel"

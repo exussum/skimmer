@@ -53,10 +53,10 @@ const Item = ({ id, from, subject, sent, groups }) => {
 
   return (
     <div className="flex">
-      <div className="basis-64 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
+      <div className="basis-64 py-2 pr-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
       <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{subject}</div>
       <div className="basis-64 p-2">{localDate}</div>
-      <select className="bg-menu p-2">{selectItems}</select>
+      <select className="bg-menu py-2 pl-2">{selectItems}</select>
     </div>
   );
 };
