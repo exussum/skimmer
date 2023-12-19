@@ -1,13 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { useCallback } from "react";
 import Modal from "react-bootstrap/Modal";
 import Dropdown from "react-bootstrap/Dropdown";
 
-export const GuestUserWarning = (props) => {
+export const GuestUserWarning = ({ onClick }) => {
   const { t } = useTranslation();
 
   return (
-    <Modal show={true} onHide={props.onClick}>
+    <Modal show={true} onHide={onClick}>
       <Modal.Body>
         <div className="space-y-6">
           <p className="text-base leading-relaxed">{t("Contact the owner to be added")}</p>
@@ -17,28 +16,28 @@ export const GuestUserWarning = (props) => {
   );
 };
 
-export const UserMenu = (props) => {
+export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
   const { t } = useTranslation();
 
-  const channels = props.channels.map((e, i) => {
+  const channelItems = channels.map((e, i) => {
     return (
       <ChannelItem
         key={`channel-${i}`}
         id={e.id}
-        channelType={e.channel_type}
-        addPath={e.add_path}
-        deleteChannel={props.deleteChannel}
+        channelType={e.channelType}
+        addPath={e.addPath}
+        deleteChannel={deleteChannel}
       />
     );
   });
 
   return (
     <Dropdown>
-      <Dropdown.Toggle variant="skimmer">{props.login}</Dropdown.Toggle>
+      <Dropdown.Toggle variant="skimmer">{login}</Dropdown.Toggle>
       <Dropdown.Menu variant="skimmer">
-        {channels}
+        {channelItems}
         <Dropdown.Divider />
-        <Dropdown.Item key="logout" onClick={props.onClick}>
+        <Dropdown.Item key="logout" onClick={onClick}>
           <div>{t("Logout")}</div>
         </Dropdown.Item>
       </Dropdown.Menu>
@@ -46,31 +45,31 @@ export const UserMenu = (props) => {
   );
 };
 
-const ChannelItem = (props) => {
+const ChannelItem = ({ id, deleteChannel, addPath, channelType }) => {
   const { t } = useTranslation();
-  const action = props.id ? t("Remove Channel Action") : t("Add Channel Action");
-  const onClick = useCallback(() => {
-    if (props.id) {
-      props.deleteChannel(props.id);
+  const action = id ? t("Remove Channel Action") : t("Add Channel Action");
+  const onClick = () => {
+    if (id) {
+      deleteChannel(id);
     } else {
-      window.location = props.addPath;
+      window.location = addPath;
     }
-  }, [props]);
+  };
   return (
     <Dropdown.Item onClick={onClick}>
-      {action} {props.channelType}
+      {action} {channelType}
     </Dropdown.Item>
   );
 };
 
-export const GoogleButton = (props) => {
+export const GoogleButton = ({ onClick, disabled }) => {
   const { t } = useTranslation();
   return (
-    <div className={props.disabled ? "opacity-50" : ""}>
+    <div className={disabled ? "opacity-50" : ""}>
       <button
         type="button"
         className="text-white bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55 me-2 mb-2"
-        onClick={props.onClick}
+        onClick={onClick}
       >
         <svg
           className="w-4 h-4 me-2"

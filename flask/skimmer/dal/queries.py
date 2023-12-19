@@ -1,4 +1,4 @@
-from sqlalchemy import column, delete, select
+from sqlalchemy import column, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from skimmer.dal import models as m
@@ -11,6 +11,21 @@ def id_for_email(email):
     result = db.session.query(m.User.id).filter(m.User.email == email).one_or_none()
     if result:
         return result[0]
+
+
+def set_group(user_id, channel_id, group_id, ids):
+    id = (
+        db.session.query(m.Group.id)
+        .filter(
+            m.Group.id == group_id,
+            m.Group.channel_id == channel_id,
+            m.Channel.user_id == user_id,
+        )
+        .join(m.Channel.groups)
+        .one_or_none()
+    )
+    if id:
+        db.session.execute(update(m.Message).where(m.Message.id.in_(ids)).values(group_id=group_id))
 
 
 def add_user(email):
@@ -34,11 +49,7 @@ def fetch_channel(id):
 
 
 def fetch_channels(user_id):
-    return list(
-        db.session.query(m.Channel.id, m.Channel.type).filter(
-            m.Channel.user_id == user_id
-        )
-    )
+    return list(db.session.query(m.Channel.id, m.Channel.type).filter(m.Channel.user_id == user_id))
 
 
 def add_group(user_id, channel_id, name, system=False):
@@ -52,9 +63,7 @@ def delete_group(user_id, channel_id, id):
             m.Group.id == id,
             m.Group.system == False,
             m.Group.channel_id
-            == select(m.Channel.id)
-            .where(m.Channel.id == channel_id, m.Channel.user_id == user_id)
-            .scalar_subquery(),
+            == select(m.Channel.id).where(m.Channel.id == channel_id, m.Channel.user_id == user_id).scalar_subquery(),
         )
     )
     session.commit()
@@ -82,9 +91,7 @@ def create_or_update_channel(user_id, access_token, refresh_token, type):
 
 
 def delete_channel(user_id, id):
-    session.query(m.Channel).filter(
-        m.Channel.user_id == user_id, m.Channel.id == id
-    ).delete()
+    session.query(m.Channel).filter(m.Channel.user_id == user_id, m.Channel.id == id).delete()
     session.commit()
 
 
@@ -103,9 +110,7 @@ def delete_groups(user_id, channel_id):
     session.execute(
         delete(m.Group).where(
             m.Group.channel_id.in_(
-                session.query(m.Channel.id)
-                .filter(m.Channel.id == channel_id, m.Channel.user_id == user_id)
-                .subquery()
+                session.query(m.Channel.id).filter(m.Channel.id == channel_id, m.Channel.user_id == user_id).subquery()
             )
         )
     )
@@ -167,21 +172,18 @@ class message_handler:
         )
 
     def __exit__(self, *args, **kwargs):
-        ids = set(
-            (
-                e[0]
-                for e in session.query(m.Message.external_id)
-                .join(m.Message.group)
-                .join(m.Group.channel)
-                .filter(
-                    m.Message.external_id.in_(
-                        (e["external_id"] for e in self.rows),
-                    ),
-                    m.Channel.user_id == self.user_id,
-                )
+        message_ids = (e["external_id"] for e in self.rows)
+        existing_query = (
+            session.query(m.Message.external_id)
+            .join(m.Message.group)
+            .join(m.Group.channel)
+            .filter(
+                m.Message.external_id.in_(message_ids),
+                m.Channel.user_id == self.user_id,
             )
         )
-        self.rows = [e for e in self.rows if e["external_id"] not in ids]
-        if self.rows:
-            session.execute(insert(m.Message), self.rows)
+        ids = set(e[0] for e in existing_query)
+
+        if rows := [e for e in self.rows if e["external_id"] not in ids]:
+            session.execute(insert(m.Message), rows)
             session.commit()

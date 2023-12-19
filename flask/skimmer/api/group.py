@@ -1,8 +1,4 @@
-from skimmer.dal.queries import (
-    add_group,
-    delete_group,
-    fetch_groups as fetch_groups_query,
-)
+from skimmer.dal.queries import add_group, delete_group, fetch_groups as fetch_groups_query, set_group
 
 
 def fetch_groups(user_id, channel_id):

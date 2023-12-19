@@ -21,4 +21,7 @@ msgid "Show group manager"
 msgstr "Groups"
 
 msgid "Remove Channel Action"
-msgstr "Remove Channel"
+msgstr "Remove"
+
+msgid "Add Channel Action"
+msgstr "Add"

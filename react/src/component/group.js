@@ -3,49 +3,46 @@ import Form from "react-bootstrap/Form";
 import { useRef, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export const GroupManager = (props) => {
-  const items = props.data
-    ? props.data.map((item, i) => {
-        return (
-          <ListItem
-            key={i}
-            itemId={item.id}
-            itemName={item.name}
-            isSystem={item.system}
-            selectGroup={props.selectGroup}
-            deleteGroup={props.deleteGroup}
-          />
-        );
-      })
-    : [];
-
+export const GroupManager = ({ processing, data, addGroup, selectGroup, deleteGroup, className }) => {
+  const items = data.map((item, i) => {
+    return (
+      <ListItem
+        key={i}
+        itemId={item.id}
+        itemName={item.name}
+        isSystem={item.system}
+        selectGroup={selectGroup}
+        deleteGroup={deleteGroup}
+      />
+    );
+  });
   const [value, setValue] = useState("");
   const textInputRef = useRef(null);
   const { t } = useTranslation();
 
   return (
-    <div className={`bg-menu flex flex-col w-80 p-2 rounded-lg ${props.className}`}>
+    <div className={`bg-menu flex flex-col w-80 p-2 rounded-lg ${className}`}>
       {items}
       <div className="flex-1 flex">
         <Form.Control
           type="text"
-          enabled={(!props.processing).toString()}
+          enabled={(!processing).toString()}
           className="flex-1"
           ref={textInputRef}
           placeholder={t("New Group Placeholder")}
           onChange={useCallback((r) => setValue(r.currentTarget.value), [setValue])}
         />
         <Button
-          enabled={(!props.processing).toString()}
-          color="{ props.processing ? 'dark' : 'black' }"
+          enabled={(!processing).toString()}
+          color="{ processing ? 'dark' : 'black' }"
           className="flex-initial bg-popup rounded-none rounded-r-lg"
           variant="skimmer"
           onClick={useCallback(
             (r) => {
-              props.addGroup(value);
+              addGroup(value);
               textInputRef.current.value = "";
             },
-            [value, props, textInputRef],
+            [value, addGroup, textInputRef],
           )}
         >
           {t("Add Group Submit")}
@@ -55,15 +52,14 @@ export const GroupManager = (props) => {
   );
 };
 
-const ListItem = (props) => {
-  const { itemId, isSystem, selectGroup, deleteGroup } = props;
+const ListItem = ({ itemName, itemId, isSystem, selectGroup, deleteGroup }) => {
   const selectCallback = useCallback(() => selectGroup(itemId), [itemId, selectGroup]);
   const deleteCallback = useCallback(() => deleteGroup(itemId), [itemId, deleteGroup]);
   return (
     <div className="flow-initial">
       <div className="flex items-center">
         <div className="flex-1 py-2" onClick={selectCallback}>
-          {props.itemName}
+          {itemName}
         </div>
         {isSystem ? (
           ""

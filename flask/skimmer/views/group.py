@@ -8,8 +8,7 @@ bp = Blueprint("group", __name__)
 @flask.protect
 def fetch_groups(user_id, channel_id):
     return [
-        {"id": id, "name": name, "system": system}
-        for (id, name, system) in group.fetch_groups(user_id, channel_id)
+        {"id": id, "name": name, "system": system} for (id, name, system) in group.fetch_groups(user_id, channel_id)
     ]
 
 
@@ -25,3 +24,11 @@ def add_group(user_id, channel_id):
 def delete_group(user_id, channel_id, id):
     group.delete_group(user_id, channel_id, id)
     return "", 204
+
+
+@bp.route("/<channel_id>/<id>", methods=["POST"])
+@flask.protect
+def set_group(user_id, channel_id, id):
+    ids = request.form.getlist("message_ids")
+    if ids:
+        group.set_group(user_id, channel_id, id, ids)

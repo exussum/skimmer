@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../api/auth";
-import { addGroup, deleteGroup, fetchGroups } from "../api/group";
+import { setGroup, addGroup, deleteGroup, fetchGroups } from "../api/group";
 import { getChannel } from "../api/channel";
 import { useQueryClient, useQueries, useMutation } from "react-query";
 import { MessageList } from "../component/channel";
@@ -20,9 +20,12 @@ export const Content = () => {
   }
 };
 
-const useMutations = (channelId, setProcessing) => {
+const useHandlers = (channelId, setProcessing) => {
   const queryClient = useQueryClient();
   const addMutation = useMutation(addGroup, {
+    onMutate: () => {
+      setProcessing(true);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelId });
       setProcessing(false);
@@ -30,12 +33,25 @@ const useMutations = (channelId, setProcessing) => {
   });
 
   const deleteMutation = useMutation(deleteGroup, {
+    onMutate: () => {
+      setProcessing(true);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelId });
       setProcessing(false);
     },
   });
-  return [addMutation, deleteMutation];
+
+  const setGroupMutation = useMutation(setGroup, {
+    onMutate: () => {
+      setProcessing(true);
+    },
+    onSuccess: () => {
+      setProcessing(false);
+    },
+  });
+
+  return [addMutation, deleteMutation, setGroupMutation];
 };
 
 const LoadContent = ({ channelId }) => {
@@ -43,16 +59,16 @@ const LoadContent = ({ channelId }) => {
   const [visible, setVisible] = useState(false);
   const { t } = useTranslation();
 
-  const [channelResults, groupResults] = useQueries({
+  const [messageResults, groupResults] = useQueries({
     queries: [
       { queryKey: ["channel", channelId], queryFn: getChannel, refetchInterval: 6000 },
       { queryKey: ["groups", channelId], queryFn: fetchGroups },
     ],
   });
 
-  const [addMutation, deleteMutation] = useMutations(channelId, setProcessing);
+  const [addMutation, deleteMutation, setGroupMutation] = useHandlers(channelId, setProcessing);
 
-  if (channelResults.data && groupResults.data) {
+  if (messageResults.data && groupResults.data) {
     return (
       <div className="flex-1 flex-col">
         <Button
@@ -71,18 +87,20 @@ const LoadContent = ({ channelId }) => {
             data={groupResults.data || []}
             className="border-2"
             deleteGroup={(id) => {
-              setProcessing(true);
               deleteMutation.mutate({ channelId: channelId, id: id });
             }}
             addGroup={(name) => {
-              if (name) {
-                setProcessing(true);
-                addMutation.mutate({ channelId: channelId, name: name });
-              }
+              name && addMutation.mutate({ channelId: channelId, name: name });
             }}
           />
         </InPlaceModal>
-        <MessageList data={channelResults.data || []} groups={groupResults.data || []} />
+        <MessageList
+          setGroup={(groupId, messageIds) =>
+            setGroupMutation.mutate({ channelId: channelId, groupId: groupId, messageIds: messageIds })
+          }
+          messages={messageResults.data || []}
+          groups={groupResults.data || []}
+        />
       </div>
     );
   } else {
@@ -95,7 +113,7 @@ const LoadContent = ({ channelId }) => {
             Groups
           </li>
           <li className="flex items-center">
-            <Loading value={channelResults.data} />
+            <Loading value={messageResults.data} />
             Messages
           </li>
         </ul>

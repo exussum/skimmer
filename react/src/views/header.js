@@ -1,21 +1,21 @@
-import { useMutation, useQuery } from "react-query";
-import { AuthContext, loginRedirect, logout, getWhoAmi } from "../api/auth";
-import { deleteChannel } from "../api/channel";
+import { AuthContext, useLoginRedirectQuery, useLogoutQuery, useWhoAmIQuery } from "../api/auth";
+import { useDeleteChannelMutation } from "../api/channel";
 import { UserMenu, GuestUserWarning, GoogleButton } from "../component/auth";
-import { useContext, useCallback, useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import { useCookies } from "react-cookie";
 
 export const Header = (props) => {
   const { ctx, setCtx } = useContext(AuthContext);
+
   const component = {
-    null: <WhoAmIQuery />,
-    auth: <AuthRedirectQuery />,
-    logout: <LogoutQuery />,
+    null: <UnknownUser />,
+    auth: <AuthRedirect />,
+    logout: <Logout />,
     known: (
       <UserMenu
         login={ctx.email}
-        onClick={useUserMenuOnClick()}
+        onClick={() => setCtx({ status: "logout" })}
         channels={ctx.channels}
         deleteChannel={useDeleteChannelClick(ctx, setCtx)}
       />
@@ -31,9 +31,8 @@ export const Header = (props) => {
   );
 };
 
-const WhoAmIQuery = () => {
-  const { setCtx } = useContext(AuthContext);
-  const { isLoading, data, error } = useQuery(["whoami"], getWhoAmi);
+const UnknownUser = () => {
+  const { setCtx, isLoading, data, error } = useWhoAmIQuery();
 
   useEffect(() => {
     if (!isLoading) {
@@ -50,12 +49,12 @@ const WhoAmIQuery = () => {
         });
       }
     }
-  }, [setCtx, data, error, isLoading]);
+  });
+  return <GoogleButton disabled={true} />;
 };
 
-const AuthRedirectQuery = () => {
-  const { setCtx } = useContext(AuthContext);
-  const { isLoading, data, error } = useQuery(["loginRedirect"], loginRedirect);
+const AuthRedirect = () => {
+  const { setCtx, isLoading, data, error } = useLoginRedirectQuery();
 
   useEffect(() => {
     if (!isLoading) {
@@ -70,21 +69,31 @@ const AuthRedirectQuery = () => {
 };
 
 const Anonymous = () => {
-  const [cookies] = useCookies(["guest"]);
-  const onClick = useGuestOnClick();
+  const [cookies, setCookie] = useCookies(["guest"]);
+  const { setCtx } = useContext(AuthContext);
 
   return (
     <>
-      <GoogleButton onClick={useAuthOnClick()} />
-      {cookies.guest ? <GuestUserWarning onClick={onClick} /> : ""}
+      <GoogleButton
+        onClick={() => {
+          setCtx({ status: "auth" });
+        }}
+      />
+      {cookies.guest ? (
+        <GuestUserWarning
+          onClick={() => {
+            setCookie("guest", false);
+          }}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
-const LogoutQuery = () => {
-  const { setCtx } = useContext(AuthContext);
-
-  const { isLoading, isError } = useQuery(["logout"], logout);
+const Logout = () => {
+  const { setCtx, isLoading, isError } = useLogoutQuery();
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -95,47 +104,22 @@ const LogoutQuery = () => {
   return <GoogleButton disabled={true} />;
 };
 
-const useUserMenuOnClick = () => {
-  const { setCtx } = useContext(AuthContext);
-  return useCallback(() => setCtx({ status: "logout" }), [setCtx]);
-};
-
-const useAuthOnClick = () => {
-  const { setCtx } = useContext(AuthContext);
-  return useCallback(() => setCtx({ status: "auth" }), [setCtx]);
-};
-
-const useGuestOnClick = () => {
-  const [, setCookie] = useCookies(["guest"]);
-  return useCallback(() => {
-    setCookie("guest", false);
-  }, [setCookie]);
-};
-
 const useDeleteChannelClick = (ctx, setCtx) => {
-  const mutation = useMutation({
-    mutationFn: deleteChannel,
-    onSuccess: async (data, variables, context) => {
-      const channels = ctx.channels.map((e) => {
-        return {
-          ...e,
-          id: e.id === variables.id ? null : e.id,
-        };
-      });
+  const onSuccess = async (id) => {
+    const channels = ctx.channels.map((e) => {
+      return {
+        ...e,
+        id: e.id === id ? null : e.id,
+      };
+    });
 
-      const subbedChannels = channels.filter((e) => e.id);
+    const subbedChannels = channels.filter((e) => e.id);
 
-      if (ctx.selectedChannelId === variables.id) {
-        ctx.selectedChannelId = subbedChannels.length && subbedChannels[0].id;
-      }
+    if (ctx.selectedChannelId === id) {
+      ctx.selectedChannelId = subbedChannels.length && subbedChannels[0].id;
+    }
 
-      setCtx({ ...ctx, channels: channels, subbedChannels: subbedChannels });
-    },
-  });
-  return useCallback(
-    (id) => {
-      mutation.mutate({ id: id });
-    },
-    [mutation],
-  );
+    setCtx({ ...ctx, channels: channels, subbedChannels: subbedChannels });
+  };
+  return useDeleteChannelMutation(onSuccess);
 };

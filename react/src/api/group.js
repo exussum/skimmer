@@ -14,6 +14,15 @@ export const addGroup = async ({ name, channelId }) => {
   });
 };
 
+export const setGroup = async ({ channelId, groupId, messageIds }) => {
+  const params = new URLSearchParams({
+    message_ids: messageIds,
+  });
+  return apiClient.post(`/group/${channelId}/${groupId}`, params, {
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+  });
+};
+
 export const deleteGroup = async ({ channelId, id }) => {
   return apiClient.delete(`/group/${channelId}/${id}`);
 };
