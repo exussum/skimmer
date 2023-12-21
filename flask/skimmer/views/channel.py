@@ -30,6 +30,7 @@ def get_channel(user_id, id):
             "sent": sent.isoformat(),
             "subject": subject,
             "body": body,
+            "group_id": group_id,
         }
-        for (id, sent, sender, subject, body) in channel.fetch_messages(user_id, id)
+        for (id, sent, sender, subject, body, group_id) in channel.fetch_messages(user_id, id)
     ]

@@ -32,3 +32,4 @@ def set_group(user_id, channel_id, id):
     ids = request.form.getlist("message_ids")
     if ids:
         group.set_group(user_id, channel_id, id, ids)
+    return []

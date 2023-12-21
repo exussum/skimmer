@@ -17,6 +17,16 @@ msgstr "Add Group"
 msgid "Channels Title"
 msgstr "Channels"
 
+msgid "Groups Title"
+msgstr "Groups"
+
+msgid "Messages Title"
+msgstr "Messages"
+
+
+
+
+
 msgid "Show group manager"
 msgstr "Groups"
 

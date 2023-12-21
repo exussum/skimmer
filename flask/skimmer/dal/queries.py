@@ -8,14 +8,14 @@ session = db.session
 
 
 def id_for_email(email):
-    result = db.session.query(m.User.id).filter(m.User.email == email).one_or_none()
+    result = session.query(m.User.id).filter(m.User.email == email).one_or_none()
     if result:
         return result[0]
 
 
 def set_group(user_id, channel_id, group_id, ids):
     id = (
-        db.session.query(m.Group.id)
+        session.query(m.Group.id)
         .filter(
             m.Group.id == group_id,
             m.Group.channel_id == channel_id,
@@ -25,7 +25,8 @@ def set_group(user_id, channel_id, group_id, ids):
         .one_or_none()
     )
     if id:
-        db.session.execute(update(m.Message).where(m.Message.id.in_(ids)).values(group_id=group_id))
+        session.execute(update(m.Message).where(m.Message.id.in_(ids)).values(group_id=group_id))
+        session.commit()
 
 
 def add_user(email):
@@ -37,7 +38,7 @@ def add_user(email):
 
 def fetch_groups(user_id, channel_id):
     return list(
-        db.session.query(m.Group.id, m.Group.name, m.Group.system)
+        session.query(m.Group.id, m.Group.name, m.Group.system)
         .filter(m.Group.channel_id == channel_id, m.Channel.user_id == user_id)
         .join(m.Channel.groups)
         .all()
@@ -45,11 +46,11 @@ def fetch_groups(user_id, channel_id):
 
 
 def fetch_channel(id):
-    return db.session.query(m.Channel).filter(m.Channel.id == id).one_or_none()
+    return session.query(m.Channel).filter(m.Channel.id == id).one_or_none()
 
 
 def fetch_channels(user_id):
-    return list(db.session.query(m.Channel.id, m.Channel.type).filter(m.Channel.user_id == user_id))
+    return list(session.query(m.Channel.id, m.Channel.type).filter(m.Channel.user_id == user_id))
 
 
 def add_group(user_id, channel_id, name, system=False):
@@ -133,6 +134,7 @@ def fetch_messages(user_id, channel_id):
             m.Message.sender,
             m.Message.subject,
             m.Message.body,
+            m.Message.group_id,
         )
         .join(m.Message.group)
         .join(m.Group.channel)

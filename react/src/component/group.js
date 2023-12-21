@@ -3,8 +3,8 @@ import Form from "react-bootstrap/Form";
 import { useRef, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export const GroupManager = ({ processing, data, addGroup, selectGroup, deleteGroup, className }) => {
-  const items = data.map((item, i) => {
+export const GroupManager = ({ processing, groups, addGroup, selectGroup, deleteGroup, className }) => {
+  const items = groups.map((item, i) => {
     return (
       <ListItem
         key={i}
