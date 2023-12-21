@@ -31,12 +31,8 @@ def refresh_channel(id):
 
 def cleanup_messages():
     with connection() as curs:
-        curs.execute(
-            "UPDATE message SET hidden = true WHERE sent < current_date - interval '1' day"
-        )
-        curs.execute(
-            "DELETE FROM message WHERE hidden = true AND sent < current_date - interval '2' day"
-        )
+        curs.execute("UPDATE message SET hidden = true WHERE sent < current_date - interval '1' day")
+        curs.execute("DELETE FROM message WHERE hidden = true AND sent < current_date - interval '30' day")
 
 
 def queue_update_channels():
@@ -59,10 +55,6 @@ def connection():
 
 def scheduler():
     scheduler = BlockingScheduler()
-    scheduler.add_job(
-        queue_update_channels, "interval", minutes=1, next_run_time=datetime.now()
-    )
-    scheduler.add_job(
-        cleanup_messages, "interval", minutes=10, next_run_time=datetime.now()
-    )
+    scheduler.add_job(queue_update_channels, "interval", minutes=1, next_run_time=datetime.now())
+    scheduler.add_job(cleanup_messages, "interval", minutes=10, next_run_time=datetime.now())
     scheduler.start()

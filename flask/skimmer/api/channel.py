@@ -1,6 +1,10 @@
 from collections import namedtuple as nt
 from datetime import datetime, timedelta
 
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+
 from skimmer.config import Config
 from skimmer.dal.google import fetch_messages as google_fetch_messages
 from skimmer.dal.models import SYSTEM_GROUP_GENERAL, ChannelType
@@ -12,6 +16,7 @@ from skimmer.dal.queries import (
     delete_messages,
     fetch_channel,
     fetch_channels as fetch_channels_query,
+    fetch_groups,
     fetch_messages,
     message_handler,
 )
@@ -23,9 +28,7 @@ ChannelSub = nt("ChannelResult", "id channel_type add_path")
 
 
 def create_or_update_channel(user_id, access_token, refresh_token, type):
-    channel_id = create_or_update_channel_query(
-        user_id, access_token, refresh_token, type
-    )
+    channel_id = create_or_update_channel_query(user_id, access_token, refresh_token, type)
     add_group(user_id, channel_id, SYSTEM_GROUP_GENERAL, True)
     return channel_id
 
@@ -36,19 +39,46 @@ def fetch_channels(user_id):
     return [ChannelSub(v, k.value, _TYPE_TO_PATH[k]) for (k, v) in result.items()]
 
 
+def predict(old_messages, new_messages):
+    pipeline = Pipeline([("vect", CountVectorizer()), ("tdiff", TfidfTransformer()), ("class", MultinomialNB())])
+    corpus = [f"{e.sender} {e.subject} {e.body}" for e in old_messages]
+    labels = [e.group_id for e in old_messages]
+    incoming = [f"{e.sender} {e.subject} {e.body}" for e in new_messages]
+    import sys
+
+    print(corpus, file=sys.stderr)
+    pipeline.fit(corpus, labels)
+    return [e.item() for e in pipeline.predict(incoming)]
+
+
 def update_messages_from_service(channel_id):
     channel = fetch_channel(channel_id)
-    if channel:
-        f = _CHANNEL_TYPE_TO_DAL[channel.type]
-        with message_handler(channel.user_id) as mh:
-            for (id, sent, sender, subject, body) in f(channel.user_id):
-                mh.add(
-                    external_id=id,
-                    sent=sent,
-                    sender=sender,
-                    subject=subject,
-                    body=body,
-                )
+    default_group = next(e for e in fetch_groups(channel.user_id, channel.id) if e.name == SYSTEM_GROUP_GENERAL)
+
+    if channel and default_group:
+        local_messages = list(fetch_messages(channel.user_id, channel.id, True))
+        remote_messages = list(_CHANNEL_TYPE_TO_DAL[channel.type](channel.user_id))
+
+        local_ids = set(e.external_id for e in local_messages)
+        remote_ids = set(e.id for e in remote_messages)
+
+        new_messages = [e for e in remote_messages if e.id not in local_ids]
+
+        if new_messages:
+            group_ids = (
+                predict(local_messages, new_messages) if local_messages else [default_group.id] * len(new_messages)
+            )
+
+            with message_handler(channel.user_id) as mh:
+                for message, group_id in zip(new_messages, group_ids):
+                    mh.add(
+                        external_id=message.id,
+                        sent=message.sent,
+                        sender=message.sender,
+                        subject=message.subject,
+                        body=message.body,
+                        group_id=group_id,
+                    )
 
 
 def delete_channel(user_id, id):

@@ -1,3 +1,5 @@
+from collections import namedtuple as nt
+
 from sqlalchemy import column, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
@@ -5,6 +7,8 @@ from skimmer.dal import models as m
 from skimmer.db import db
 
 session = db.session
+
+Message = nt("Message", "id  sent  sender  subject  body  group_id external_id")
 
 
 def id_for_email(email):
@@ -126,8 +130,8 @@ def fetch_channel_tokens(user_id, type):
     )
 
 
-def fetch_messages(user_id, channel_id):
-    return (
+def fetch_messages(user_id, channel_id, include_hidden):
+    result = (
         session.query(
             m.Message.id,
             m.Message.sent,
@@ -135,12 +139,16 @@ def fetch_messages(user_id, channel_id):
             m.Message.subject,
             m.Message.body,
             m.Message.group_id,
+            m.Message.external_id,
         )
         .join(m.Message.group)
         .join(m.Group.channel)
         .filter(m.Channel.user_id == user_id, channel_id == m.Channel.id)
-        .order_by(m.Message.sent.desc())
     )
+    if not include_hidden:
+        result = result.filter(m.Message.hidden == False)
+
+    return (Message(*e) for e in result.order_by(m.Message.sent.desc()))
 
 
 class message_handler:
@@ -149,18 +157,9 @@ class message_handler:
         self.user_id = user_id
 
     def __enter__(self):
-        self.default_group = (
-            session.query(m.Group.id)
-            .join(m.Group.channel)
-            .filter(
-                m.Channel.user_id == self.user_id,
-                m.Group.name == m.SYSTEM_GROUP_GENERAL,
-            )
-            .first()[0]
-        )
         return self
 
-    def add(self, external_id, subject, sender, body, sent):
+    def add(self, external_id, subject, sender, body, sent, group_id):
         self.rows.append(
             {
                 "sender": sender,
@@ -168,24 +167,11 @@ class message_handler:
                 "subject": subject,
                 "body": body,
                 "sent": sent,
-                "group_id": self.default_group,
-                "hidden": True,
+                "group_id": group_id,
+                "hidden": False,
             }
         )
 
     def __exit__(self, *args, **kwargs):
-        message_ids = (e["external_id"] for e in self.rows)
-        existing_query = (
-            session.query(m.Message.external_id)
-            .join(m.Message.group)
-            .join(m.Group.channel)
-            .filter(
-                m.Message.external_id.in_(message_ids),
-                m.Channel.user_id == self.user_id,
-            )
-        )
-        ids = set(e[0] for e in existing_query)
-
-        if rows := [e for e in self.rows if e["external_id"] not in ids]:
-            session.execute(insert(m.Message), rows)
-            session.commit()
+        session.execute(insert(m.Message), self.rows)
+        session.commit()

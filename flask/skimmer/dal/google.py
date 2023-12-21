@@ -7,6 +7,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 from skimmer.config import Config
+from skimmer.dal.dto import ExternalMessage
 from skimmer.dal.models import ChannelType
 from skimmer.dal.queries import create_or_update_channel, fetch_channel_tokens
 
@@ -53,7 +54,7 @@ class _FetchMessages:
         self.result = {}
 
     def __call__(self, id, resp, exc):
-        self.result[id] = (
+        self.result[id] = ExternalMessage(
             resp["id"],
             datetime.fromtimestamp(int(resp["internalDate"]) / 1000),
             self._header("From", resp),
@@ -62,17 +63,13 @@ class _FetchMessages:
         )
 
     def _header(self, needle, resp):
-        return next((e for e in resp["payload"]["headers"] if e["name"] == needle), "")[
-            "value"
-        ]
+        return next((e for e in resp["payload"]["headers"] if e["name"] == needle), "")["value"]
 
     @classmethod
     def execute(cls, access_token):
         service = _build_service(access_token)
         message_api = service.users().messages()
-        list_response = message_api.list(
-            userId="me", labelIds=["INBOX"], q="newer_than:2d"
-        ).execute()
+        list_response = message_api.list(userId="me", labelIds=["INBOX"], q="newer_than:2d").execute()
 
         callback = cls()
         bt = service.new_batch_http_request(callback=callback)
