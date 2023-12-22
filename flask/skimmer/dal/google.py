@@ -1,5 +1,8 @@
+import email
 import string
+from base64 import urlsafe_b64decode
 from datetime import datetime
+from email import policy, utils
 
 import jwt
 import requests
@@ -54,16 +57,20 @@ class _FetchMessages:
         self.result = {}
 
     def __call__(self, id, resp, exc):
-        self.result[id] = ExternalMessage(
-            resp["id"],
-            datetime.fromtimestamp(int(resp["internalDate"]) / 1000),
-            self._header("From", resp),
-            self._header("Subject", resp),
-            resp["snippet"],
-        )
+        message = email.message_from_bytes(urlsafe_b64decode(resp["raw"]), policy=policy.default)
+        sent = utils.parsedate_to_datetime(message.get("date"))
+        frm = message.get("from")
+        subject = message.get("subject")
+        content = next((e for e in message.walk() if e.get_content_type() == "text/plain"), None)
 
-    def _header(self, needle, resp):
-        return next((e for e in resp["payload"]["headers"] if e["name"] == needle), "")["value"]
+        if message:
+            self.result[id] = ExternalMessage(
+                resp["id"],
+                sent,
+                frm,
+                subject,
+                content.get_content().replace("\r", " ").replace("\n", " ") if content else "",
+            )
 
     @classmethod
     def execute(cls, access_token):
@@ -74,7 +81,7 @@ class _FetchMessages:
         callback = cls()
         bt = service.new_batch_http_request(callback=callback)
         for e in list_response["messages"]:
-            bt.add(message_api.get(userId="me", id=e["id"]))
+            bt.add(message_api.get(userId="me", id=e["id"], format="raw"))
         bt.execute()
         return callback.result.values()
 
