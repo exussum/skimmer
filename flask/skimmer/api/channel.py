@@ -44,9 +44,6 @@ def predict(old_messages, new_messages):
     corpus = [f"{e.sender} {e.subject} {e.body}" for e in old_messages]
     labels = [e.group_id for e in old_messages]
     incoming = [f"{e.sender} {e.subject} {e.body}" for e in new_messages]
-    import sys
-
-    print(corpus, file=sys.stderr)
     pipeline.fit(corpus, labels)
     return [e.item() for e in pipeline.predict(incoming)]
 

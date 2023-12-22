@@ -23,7 +23,7 @@ def refresh_channel(id):
     response = requests.get(
         FLASK_API_ENDPOINT_UPDATE_CHANNEL,
         timeout=5,
-        data={"id": id},
+        params={"id": id},
         headers={"Skimmer-Api-Auth": FLASK_SECRET_KEY},
     )
     response.raise_for_status()
