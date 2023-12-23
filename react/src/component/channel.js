@@ -46,7 +46,7 @@ export const MessageList = ({ messages, groups, setGroup }) => {
       groupId={e.groupId}
     />
   ));
-  return <div className="px-2 bg-menu flex-1 flex flex-col overflow-hidden">{items}</div>;
+  return <div className="px-2 bg-menu grid grid-cols-[200px_auto_250px_auto]">{items}</div>;
 };
 
 const Item = ({ id, from, subject, sent, groups, setGroup, groupId }) => {
@@ -59,13 +59,13 @@ const Item = ({ id, from, subject, sent, groups, setGroup, groupId }) => {
   ));
 
   return (
-    <div className="flex">
-      <div className="basis-64 py-2 pr-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
-      <div className="flex-1 p-2 text-ellipsis overflow-hidden whitespace-nowrap">{subject}</div>
-      <div className="basis-64 p-2">{localDate}</div>
+    <>
+      <div className="py-2 pr-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
+      <div className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">{subject}</div>
+      <div className="p-2">{localDate}</div>
       <select className="bg-menu py-2 p-2" onChange={(e) => setGroup(e.target.value, [id])} value={groupId}>
         {selectItems}
       </select>
-    </div>
+    </>
   );
 };

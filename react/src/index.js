@@ -34,7 +34,7 @@ const App = () => {
   return (
     <AuthContext.Provider value={{ ctx, setCtx }}>
       <QueryClientProvider client={queryClient}>
-        <div className="h-screen flex flex-col mx-8 px-8 pt-8 bg-content rounded-l">
+        <div className="min-h-screen flex flex-col mx-8 px-8 pt-8 bg-content rounded-l">
           <Header className="basis-16 border-0 border-b-2 border-solid border-b-menu" />
           {ctx.email ? (
             <div className="grow">

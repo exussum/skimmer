@@ -64,7 +64,7 @@ const ListItem = ({ itemName, itemId, isSystem, selectGroup, deleteGroup }) => {
         {isSystem ? (
           ""
         ) : (
-          <Button className="flex-initial" onClick={deleteCallback}>
+          <Button variant="skimmer" className="flex-initial" onClick={deleteCallback}>
             x
           </Button>
         )}
