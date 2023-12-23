@@ -1,7 +1,9 @@
+import logging
 from collections import namedtuple as nt
 from datetime import datetime, timedelta
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics import accuracy_score
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
@@ -20,6 +22,8 @@ from skimmer.dal.queries import (
     fetch_messages,
     message_handler,
 )
+
+logger = logging.getLogger(__name__)
 
 _TYPE_TO_PATH = {ChannelType.Google: Config.Channel.CHANNEL_GOOGLE_REDIRECT_URL}
 _CHANNEL_TYPE_TO_DAL = {ChannelType.Google: google_fetch_messages}
@@ -45,37 +49,38 @@ def predict(old_messages, new_messages):
     labels = [e.group_id for e in old_messages]
     incoming = [f"{e.sender} {e.subject} {e.body}" for e in new_messages]
     pipeline.fit(corpus, labels)
-    return [e.item() for e in pipeline.predict(incoming)]
+    predictions = pipeline.predict(incoming)
+    return [e.item() for e in predictions]
 
 
 def update_messages_from_service(channel_id):
     channel = fetch_channel(channel_id)
     default_group = next(e for e in fetch_groups(channel.user_id, channel.id) if e.name == SYSTEM_GROUP_GENERAL)
 
-    if channel and default_group:
-        local_messages = list(fetch_messages(channel.user_id, channel.id, True))
-        remote_messages = list(_CHANNEL_TYPE_TO_DAL[channel.type](channel.user_id))
+    if not (channel and default_group):
+        return
 
-        local_ids = set(e.external_id for e in local_messages)
-        remote_ids = set(e.id for e in remote_messages)
+    local_messages = list(fetch_messages(channel.user_id, channel.id, True))
+    remote_messages = list(_CHANNEL_TYPE_TO_DAL[channel.type](channel.user_id))
 
-        new_messages = [e for e in remote_messages if e.id not in local_ids]
+    local_ids = set(e.external_id for e in local_messages)
+    remote_ids = set(e.id for e in remote_messages)
 
-        if new_messages:
-            group_ids = (
-                predict(local_messages, new_messages) if local_messages else [default_group.id] * len(new_messages)
-            )
+    new_messages = [e for e in remote_messages if e.id not in local_ids]
 
-            with message_handler(channel.user_id) as mh:
-                for message, group_id in zip(new_messages, group_ids):
-                    mh.add(
-                        external_id=message.id,
-                        sent=message.sent,
-                        sender=message.sender,
-                        subject=message.subject,
-                        body=message.body,
-                        group_id=group_id,
-                    )
+    if new_messages:
+        group_ids = predict(local_messages, new_messages) if local_messages else [default_group.id] * len(new_messages)
+
+        with message_handler(channel.user_id) as mh:
+            for message, group_id in zip(new_messages, group_ids):
+                mh.add(
+                    external_id=message.id,
+                    sent=message.sent,
+                    sender=message.sender,
+                    subject=message.subject,
+                    body=message.body,
+                    group_id=group_id,
+                )
 
 
 def delete_channel(user_id, id):

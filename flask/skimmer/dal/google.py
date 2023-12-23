@@ -6,6 +6,8 @@ from email import policy, utils
 
 import jwt
 import requests
+from bs4 import BeautifulSoup
+from bs4.element import Comment
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
@@ -61,16 +63,12 @@ class _FetchMessages:
         sent = utils.parsedate_to_datetime(message.get("date"))
         frm = message.get("from")
         subject = message.get("subject")
-        content = next((e for e in message.walk() if e.get_content_type() == "text/plain"), None)
+        text_content = next((e for e in message.walk() if e.get_content_type() == "text/plain"), None)
+        html_content = next((e for e in message.walk() if e.get_content_type() == "text/html"), None)
 
-        if message:
-            self.result[id] = ExternalMessage(
-                resp["id"],
-                sent,
-                frm,
-                subject,
-                content.get_content().replace("\r", " ").replace("\n", " ") if content else "",
-            )
+        self.result[id] = ExternalMessage(
+            resp["id"], sent, frm, subject, strip_html((text_content or html_content).get_content())
+        )
 
     @classmethod
     def execute(cls, access_token):
@@ -98,3 +96,16 @@ def _call(f, id):
         access_token = refresh_access_token(refresh_token)
         create_or_update_channel(id, access_token, refresh_token, ChannelType.Google)
         return f(access_token)
+
+
+def _tag_visible(element):
+    return (not element.parent.name in ["style", "script", "head", "title", "meta", "[document]"]) and (
+        not isinstance(element, Comment)
+    )
+
+
+def strip_html(body):
+    soup = BeautifulSoup(body, "html.parser")
+    texts = soup.findAll(text=True)
+    visible_texts = filter(_tag_visible, texts)
+    return " ".join(t.strip() for t in filter(_tag_visible, texts)).replace("\r", " ").replace("\n", " ")
