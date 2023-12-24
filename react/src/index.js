@@ -25,7 +25,7 @@ i18n
   });
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: Infinity, cacheTime: 0 } },
+  defaultOptions: { queries: { staleTime: Infinity, cacheTime: 0, retry: false } },
 });
 
 const App = () => {

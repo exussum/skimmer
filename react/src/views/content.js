@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, createContext } from "react";
 import { AuthContext } from "../api/auth";
 import { useSetGroupMutation, useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
 import { getChannel } from "../api/channel";
@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import Button from "react-bootstrap/Button";
 import Loading from "../component/loading-status";
 import InPlaceModal from "../component/modal";
+
+const GroupContext = createContext([]);
 
 export const Content = () => {
   const { ctx } = useContext(AuthContext);
@@ -22,15 +24,23 @@ export const Content = () => {
 
 const LoadingContent = ({ channelId }) => {
   const { t } = useTranslation();
+  const [delayRefresh, setDelayRefresh] = useState(false);
   const [messageResults, groupResults] = useQueries({
     queries: [
-      { queryKey: ["channel", channelId], queryFn: getChannel, refetchInterval: 6000 },
+      { queryKey: ["channel", channelId], queryFn: getChannel, refetchInterval: !delayRefresh && 6000 },
       { queryKey: ["groups", channelId], queryFn: fetchGroups },
     ],
   });
 
   if (messageResults.data && groupResults.data) {
-    return <Messages groups={groupResults.data} messages={messageResults.data} channelId={channelId} />;
+    return (
+      <GroupContext.Provider value={groupResults.data}>
+        <div className="flex-1 flex-col">
+          <Groups channelId={channelId} />
+          <Messages messages={messageResults.data} channelId={channelId} setDelayRefresh={setDelayRefresh} />
+        </div>
+      </GroupContext.Provider>
+    );
   } else {
     return (
       <div className="p-2 flex-1 flex-col bg-menu">
@@ -50,16 +60,16 @@ const LoadingContent = ({ channelId }) => {
   }
 };
 
-const Messages = ({ channelId, messages, groups }) => {
-  const [processing, setProcessing] = useState(false);
+const Groups = ({ channelId }) => {
   const [visible, setVisible] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const addMutation = useAddGroupMutation(channelId, setProcessing);
   const deleteMutation = useDeleteGroupMutation(channelId, setProcessing);
-  const setGroupMutation = useSetGroupMutation(channelId, setProcessing);
+  const groups = useContext(GroupContext);
   const { t } = useTranslation();
 
   return (
-    <div className="flex-1 flex-col">
+    <>
       <Button
         variant="skimmer"
         onClick={(e) => {
@@ -83,24 +93,32 @@ const Messages = ({ channelId, messages, groups }) => {
           }}
         />
       </InPlaceModal>
-      <MessageList
-        setGroup={(groupId, messageIds) => {
-          setGroupMutation.mutate(
-            { channelId: channelId, groupId: groupId, messageIds: messageIds },
-            {
-              onSuccess: () => {
-                messages.forEach((e) => {
-                  if (messageIds.includes(e.id)) {
-                    e.groupId = groupId;
-                  }
-                });
-              },
+    </>
+  );
+};
+
+const Messages = ({ channelId, messages, setDelayRefresh }) => {
+  const setGroupMutation = useSetGroupMutation(channelId);
+  const groups = useContext(GroupContext);
+
+  return (
+    <MessageList
+      setGroup={(groupId, messageIds) => {
+        setGroupMutation.mutate(
+          { channelId: channelId, groupId: groupId, messageIds: messageIds },
+          {
+            onSuccess: () => {
+              messages.forEach((e) => {
+                if (messageIds.includes(e.id)) {
+                  e.groupId = groupId;
+                }
+              });
             },
-          );
-        }}
-        messages={messages}
-        groups={groups}
-      />
-    </div>
+          },
+        );
+      }}
+      messages={messages}
+      groups={groups}
+    />
   );
 };
