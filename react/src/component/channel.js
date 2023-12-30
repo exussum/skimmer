@@ -33,7 +33,7 @@ const Channel = ({ id, channelType, onClick }) => {
   );
 };
 
-export const MessageList = ({ messages, groups, setGroup }) => {
+export const MessageList = ({ messages, groups, setGroup, hide }) => {
   const items = messages.map((e) => (
     <Item
       groups={groups}
@@ -44,12 +44,13 @@ export const MessageList = ({ messages, groups, setGroup }) => {
       setGroup={setGroup}
       id={e.id}
       groupId={e.groupId}
+      hide={hide}
     />
   ));
   return <div className="px-2 bg-menu grid grid-cols-[28px_200px_auto_250px_auto]">{items}</div>;
 };
 
-const Item = ({ id, from, subject, sent, groups, setGroup, groupId }) => {
+const Item = ({ id, from, subject, sent, groups, setGroup, groupId, hide }) => {
   const localDate = new Date(sent).toLocaleString("en-US");
 
   const selectItems = groups.map((e) => (
@@ -60,7 +61,16 @@ const Item = ({ id, from, subject, sent, groups, setGroup, groupId }) => {
 
   return (
     <>
-      <div className="py-2 pr-2">
+      <div
+        data-message-id={id}
+        className="py-2 pr-2"
+        onClick={(e) => {
+          for (const n of e.currentTarget.parentNode.querySelectorAll(`[data-message-id='${id}']`)) {
+            n.style.display = "none";
+          }
+          hide([id]);
+        }}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -76,10 +86,24 @@ const Item = ({ id, from, subject, sent, groups, setGroup, groupId }) => {
           />
         </svg>
       </div>
-      <div className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
-      <div className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">{subject}</div>
-      <div className="p-2">{localDate}</div>
-      <select className="bg-menu py-2 p-2" onChange={(e) => setGroup(e.target.value, [id])} value={groupId}>
+      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+        {from}
+      </div>
+      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+        {subject}
+      </div>
+      <div data-message-id={id} className="p-2">
+        {localDate}
+      </div>
+      <select
+        data-message-id={id}
+        className="bg-menu py-2 p-2"
+        onChange={(e) => {
+          e.stopPropagation();
+          setGroup(e.target.value, [id]);
+        }}
+        value={groupId}
+      >
         {selectItems}
       </select>
     </>

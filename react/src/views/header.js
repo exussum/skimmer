@@ -36,7 +36,8 @@ const UnknownUser = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!data.email || error) {
+      if (error || !data.email) {
+        console.log(error);
         setCtx({ status: "anonymous" });
       } else {
         const activeChannels = data.channels.filter((e) => e.id);

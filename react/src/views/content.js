@@ -1,6 +1,7 @@
 import { useState, useContext, createContext } from "react";
 import { AuthContext } from "../api/auth";
-import { useSetGroupMutation, useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
+import { useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
+import { useHideMutation, useSetGroupMutation } from "../api/message";
 import { getChannel } from "../api/channel";
 import { useQueries } from "react-query";
 import { MessageList } from "../component/channel";
@@ -10,7 +11,7 @@ import Button from "react-bootstrap/Button";
 import Loading from "../component/loading-status";
 import InPlaceModal from "../component/modal";
 
-const GroupContext = createContext([]);
+const GroupContext = createContext(null);
 
 export const Content = () => {
   const { ctx } = useContext(AuthContext);
@@ -24,20 +25,21 @@ export const Content = () => {
 
 const LoadingContent = ({ channelId }) => {
   const { t } = useTranslation();
-  const [delayRefresh, setDelayRefresh] = useState(false);
   const [messageResults, groupResults] = useQueries({
     queries: [
-      { queryKey: ["channel", channelId], queryFn: getChannel, refetchInterval: !delayRefresh && 6000 },
+      { queryKey: ["channel", channelId], queryFn: getChannel, refetchInterval: 6000 },
       { queryKey: ["groups", channelId], queryFn: fetchGroups },
     ],
   });
 
+  const [processing, setProcessing] = useState(false);
+
   if (messageResults.data && groupResults.data) {
     return (
-      <GroupContext.Provider value={groupResults.data}>
+      <GroupContext.Provider value={{ groups: groupResults.data, processing, setProcessing }}>
         <div className="flex-1 flex-col">
           <Groups channelId={channelId} />
-          <Messages messages={messageResults.data} channelId={channelId} setDelayRefresh={setDelayRefresh} />
+          <Messages messages={messageResults.data} channelId={channelId} />
         </div>
       </GroupContext.Provider>
     );
@@ -61,11 +63,10 @@ const LoadingContent = ({ channelId }) => {
 };
 
 const Groups = ({ channelId }) => {
+  const { groups, processing, setProcessing } = useContext(GroupContext);
   const [visible, setVisible] = useState(false);
-  const [processing, setProcessing] = useState(false);
   const addMutation = useAddGroupMutation(channelId, setProcessing);
   const deleteMutation = useDeleteGroupMutation(channelId, setProcessing);
-  const groups = useContext(GroupContext);
   const { t } = useTranslation();
 
   return (
@@ -86,10 +87,10 @@ const Groups = ({ channelId }) => {
           groups={groups}
           className="border-2"
           deleteGroup={(id) => {
-            deleteMutation.mutate({ channelId: channelId, id: id });
+            deleteMutation.mutate({ channelId, id });
           }}
           addGroup={(name) => {
-            name && addMutation.mutate({ channelId: channelId, name: name });
+            name && addMutation.mutate({ channelId, name });
           }}
         />
       </InPlaceModal>
@@ -97,15 +98,19 @@ const Groups = ({ channelId }) => {
   );
 };
 
-const Messages = ({ channelId, messages, setDelayRefresh }) => {
-  const setGroupMutation = useSetGroupMutation(channelId);
-  const groups = useContext(GroupContext);
+const Messages = ({ channelId, messages }) => {
+  const { groups, setProcessing } = useContext(GroupContext);
+  const setGroupMutation = useSetGroupMutation(setProcessing);
+  const hideMutation = useHideMutation(channelId);
 
   return (
     <MessageList
+      hide={(messageIds) => {
+        hideMutation.mutate({ messageIds });
+      }}
       setGroup={(groupId, messageIds) => {
         setGroupMutation.mutate(
-          { channelId: channelId, groupId: groupId, messageIds: messageIds },
+          { groupId, messageIds },
           {
             onSuccess: () => {
               messages.forEach((e) => {

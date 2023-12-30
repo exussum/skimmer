@@ -3,7 +3,7 @@ import { useContext, createContext, useState } from "react";
 import { useQuery } from "react-query";
 
 const DEFAULT_STATE = { status: null, login: null };
-export const AuthContext = createContext(DEFAULT_STATE);
+export const AuthContext = createContext(null);
 
 const getWhoAmi = async () => {
   return await apiClient.get("auth/whoami").then((res) => res.data);

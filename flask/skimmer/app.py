@@ -6,7 +6,7 @@ from pymemcache.client.base import Client
 from flask import Flask
 from skimmer.config import Config
 from skimmer.db import db
-from skimmer.views import auth, channel, group, i18n, tasks
+from skimmer.views import auth, channel, group, i18n, message, tasks
 
 app = Flask(__name__)
 app.config.update(
@@ -20,12 +20,13 @@ app.config.update(
     }
 )
 
-for (path, mod) in {
+for path, mod in {
     "/auth": auth,
     "/i18n": i18n,
     "/group": group,
     "/channel": channel,
     "/tasks": tasks,
+    "/message": message,
 }.items():
     app.register_blueprint(mod.bp, url_prefix=path)
 

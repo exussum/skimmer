@@ -17,19 +17,40 @@ def id_for_email(email):
         return result[0]
 
 
-def set_group(user_id, channel_id, group_id, ids):
-    id = (
+def _fetch_valid_message_ids(user_id, ids):
+    query = (
+        (session.query(m.Message.id).filter(m.Message.id.in_(ids), m.Channel.user_id == user_id))
+        .join(m.Message.group)
+        .join(m.Group.channel)
+    )
+    return [e[0] for e in query]
+
+
+def hide_messages(user_id, message_ids):
+    message_ids = _fetch_valid_message_ids(user_id, message_ids)
+
+    if message_ids:
+        import sys
+
+        print(message_ids, file=sys.stderr)
+        session.execute(update(m.Message).where(m.Message.id.in_(message_ids)).values(hidden=True))
+        session.commit()
+
+
+def set_group(user_id, group_id, message_ids):
+    group_id = (
         session.query(m.Group.id)
         .filter(
             m.Group.id == group_id,
-            m.Group.channel_id == channel_id,
             m.Channel.user_id == user_id,
         )
         .join(m.Channel.groups)
         .one_or_none()
     )
-    if id:
-        session.execute(update(m.Message).where(m.Message.id.in_(ids)).values(group_id=group_id))
+    message_ids = _fetch_valid_message_ids(user_id, message_ids)
+
+    if group_id and message_ids:
+        session.execute(update(m.Message).where(m.Message.id.in_(message_ids)).values(group_id=group_id[0]))
         session.commit()
 
 

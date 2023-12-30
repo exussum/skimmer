@@ -46,24 +46,3 @@ export const useDeleteGroupMutation = (channelId, setProcessing) => {
   });
   return deleteMutation;
 };
-
-export const setGroup = async ({ channelId, groupId, messageIds }) => {
-  const params = new URLSearchParams({
-    message_ids: messageIds,
-  });
-  return apiClient.post(`/group/${channelId}/${groupId}`, params, {
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-  });
-};
-
-export const useSetGroupMutation = (channelId, setProcessing) => {
-  const setGroupMutation = useMutation(setGroup, {
-    onMutate: () => {
-      setProcessing(true);
-    },
-    onSuccess: () => {
-      setProcessing(false);
-    },
-  });
-  return setGroupMutation;
-};

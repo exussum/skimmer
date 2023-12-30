@@ -1,5 +1,5 @@
 from flask import Blueprint, make_response, request, session
-from skimmer.api import auth, flask, group
+from skimmer.api import flask, group
 
 bp = Blueprint("group", __name__)
 
@@ -24,12 +24,3 @@ def add_group(user_id, channel_id):
 def delete_group(user_id, channel_id, id):
     group.delete_group(user_id, channel_id, id)
     return "", 204
-
-
-@bp.route("/<channel_id>/<id>", methods=["POST"])
-@flask.protect
-def set_group(user_id, channel_id, id):
-    ids = request.form.getlist("message_ids")
-    if ids:
-        group.set_group(user_id, channel_id, id, ids)
-    return []
