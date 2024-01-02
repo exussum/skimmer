@@ -2,6 +2,8 @@ import Button from "react-bootstrap/Button";
 import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 
+const BLUR = ""; /* blur-sm */
+
 export const ChannelNav = ({ channels, className, onSelect }) => {
   const buttons = channels.map((e) => <Channel key={e.id} channelType={e.channelType} id={e.id} onClick={onSelect} />);
 
@@ -86,10 +88,10 @@ const Item = ({ id, from, subject, sent, groups, setGroup, groupId, hide }) => {
           />
         </svg>
       </div>
-      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
         {from}
       </div>
-      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
         {subject}
       </div>
       <div data-message-id={id} className="p-2">
