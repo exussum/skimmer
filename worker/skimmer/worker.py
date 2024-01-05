@@ -33,7 +33,7 @@ def cleanup_messages():
     with connection() as curs:
         curs.execute("UPDATE message SET hidden = true WHERE sent < current_date - interval '1' day")
         curs.execute(
-            """DELETE FROM message WHERE message.group_id NOT IN (SELECT id FROM "group" WHERE "system" == true) AND hidden = true AND sent < current_date - interval '30' day"""
+            """DELETE FROM message WHERE message.group_id NOT IN (SELECT id FROM "group" WHERE system = true) AND hidden = true AND sent < current_date - interval '30' day"""
         )
 
 

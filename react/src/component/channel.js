@@ -2,7 +2,7 @@ import Button from "react-bootstrap/Button";
 import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 
-const BLUR = ""; /* blur-sm */
+const BLUR = " "; /* blur-sm */
 
 export const ChannelNav = ({ channels, className, onSelect }) => {
   const buttons = channels.map((e) => <Channel key={e.id} channelType={e.channelType} id={e.id} onClick={onSelect} />);

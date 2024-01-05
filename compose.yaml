@@ -15,7 +15,9 @@ services:
     image: skimmer-fe
     build: react
     volumes:
-      - ./react:/app
+      - ./react/src:/app/src
+      - ./react/public:/app/public
+      - ./react/tailwind.config.js:/app/tailwind.config.js
     ports:
       - "8080:3000"
     env_file: react/.env

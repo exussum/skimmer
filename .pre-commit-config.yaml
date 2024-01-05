@@ -24,4 +24,4 @@ repos:
       - id: js
         name: prettier
         language: system
-        entry: docker compose run -T fe sh -c 'yarn run prettier --print-width 120 -w src'
+        entry: docker run -t -v ./react/src:/app/src --rm skimmer-fe sh -c 'yarn run prettier --print-width 120 -w /app/src'
