@@ -2,4 +2,4 @@ The goal of Skimmer is to take in communication from multiple sources, email, gi
 
 Skimmer is my pet project, soup to nuts, using everything.  It's partially an idealistic demonstration of ability, partially a learning project, all to get the task done.
 
-To setup, run dev-setup.sh, which installs atlas, runs docker, puts in a basic .env file and runs the app
+To setup, copy .env.example to .env and run setup.py.  Note, some variables will be required to deploy to kubernetes, but not for development.

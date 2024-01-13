@@ -28,6 +28,7 @@ def oauth_token_req():
             ),
             ("state", state),
             ("access_type", "offline"),
+            ("prompt", "consent"),
         )
     )
     return state, urlunsplit(parts[:3] + (params,) + parts[4:])

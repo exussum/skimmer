@@ -21,11 +21,11 @@ services:
     ports:
       - "8080:3000"
     env_file: react/.env
-  tf:
-    image: skimmer-tf
-    build: tf
+  k8s:
+    image: skimmer-k8s
+    build: k8s
     volumes:
-      - ./tf:/app
+      - ./k8s:/app
   db:
     image: postgres:16.1
     environment:

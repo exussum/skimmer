@@ -1,11 +1,13 @@
 """A Kubernetes Python Pulumi program"""
-
+import os
 from collections import namedtuple as nt
 
 import pulumi
+from pulumi_command import local
 from pulumi_kubernetes.apps.v1 import Deployment, DeploymentSpecArgs
 from pulumi_kubernetes.core.v1 import (
     ContainerArgs,
+    Endpoints,
     EnvVarArgs,
     PodSpecArgs,
     PodTemplateSpecArgs,
@@ -118,3 +120,18 @@ short_service(Api, {8000: 8000}, [])
 
 short_deployment(Fe)
 short_service(Fe, {443: 443}, ["192.168.1.240"])
+
+Service(
+    "skimmer-db",
+    metadata=ObjectMetaArgs(name="skimmer-db"),
+    spec=ServiceSpecArgs(
+        type="ClusterIP",
+        cluster_ip="None",
+    ),
+)
+Endpoints("skimmer-db", metadata=ObjectMetaArgs(name="skimmer-db"), subsets=[{"addresses": [{"ip": "192.168.1.240"}]}])
+
+migrate = local.run(
+    archive_paths=[], command=f"atlas migrate apply --dir file://../migrations --url {os.environ['DB_URI']}"
+)
+pulumi.export("migration", migrate.stdout)

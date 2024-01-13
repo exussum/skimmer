@@ -1,3 +1,7 @@
 __pycache__
+kubeconfig
 .env
+.passwd
+*.pem
 dependencies
+Pulumi.*.yaml
