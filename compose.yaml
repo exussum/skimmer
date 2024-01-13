@@ -21,6 +21,11 @@ services:
     ports:
       - "8080:3000"
     env_file: react/.env
+  tf:
+    image: skimmer-tf
+    build: tf
+    volumes:
+      - ./tf:/app
   db:
     image: postgres:16.1
     environment:

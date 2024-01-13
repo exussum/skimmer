@@ -1,0 +1,5 @@
+FROM skimmer-api
+COPY ./flask/i18n /app/i18n
+COPY ./flask/skimmer /app/skimmer
+RUN pip install gunicorn==21.2.0
+CMD gunicorn -w 4 -b 0.0.0.0 'skimmer.app:app'

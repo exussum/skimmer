@@ -35,5 +35,5 @@ CORS(
     origins=["http://localhost:8080", "http://localhost:8000"],
     supports_credentials=True,
 )
-Session(app)
+# Session(app)
 db.init_app(app)
