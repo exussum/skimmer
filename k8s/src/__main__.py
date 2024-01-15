@@ -20,7 +20,6 @@ from pulumi_kubernetes.meta.v1 import LabelSelectorArgs, ObjectMetaArgs
 
 REGISTRY = environ["IMAGE_REGISTRY"]
 
-
 config = pulumi.Config()
 
 
@@ -111,6 +110,15 @@ class RabbitMQ:
     replicas = 1
 
 
+class Worker:
+    selector = {"app": "skimmer-worker"}
+    name = "skimmer-worker"
+    image_name = f"{REGISTRY}/skimmer-worker-prod:latest"
+    env_vars = ["FLASK_API_ENDPOINT_UPDATE_CHANNEL", "FLASK_SECRET_KEY", "RABBITMQ_URI", "WORKER_DB_URI"]
+    env_var_args = []
+    replicas = 1
+
+
 short_deployment(RabbitMQ)
 short_service(RabbitMQ, {5672: 5672}, [])
 
@@ -122,6 +130,8 @@ short_service(Api, {8000: 8000}, [])
 
 short_deployment(Fe)
 short_service(Fe, {443: 443}, [environ["FE_ADDR"]])
+
+short_deployment(Worker)
 
 Service(
     "skimmer-db",
@@ -136,6 +146,7 @@ Endpoints(
 )
 
 migrate = local.run(
-    archive_paths=[], command=f"atlas migrate apply --dir file://../migrations --url {environ['DB_URI']}"
+    archive_paths=["../migrations/**"],
+    command=f"atlas migrate apply --dir file://../migrations --url {environ['DB_URI']}",
 )
 pulumi.export("migration", migrate.stdout)
