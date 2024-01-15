@@ -1,6 +1,5 @@
 FROM python:3.11.6-alpine3.18
 WORKDIR /app
-ENV PULUMI_CONFIG_PASSPHRASE_FILE /app/.passwd
 ENV NO_COLOR 1
 COPY requirements.txt .
 RUN ls -l

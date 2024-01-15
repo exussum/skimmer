@@ -1,6 +1,6 @@
 """A Kubernetes Python Pulumi program"""
-import os
 from collections import namedtuple as nt
+from os import environ
 
 import pulumi
 from pulumi_command import local
@@ -18,7 +18,9 @@ from pulumi_kubernetes.core.v1 import (
 from pulumi_kubernetes.core.v1.outputs import EnvVar
 from pulumi_kubernetes.meta.v1 import LabelSelectorArgs, ObjectMetaArgs
 
-REGISTRY = "192.168.1.240:32000"
+REGISTRY = environ["IMAGE_REGISTRY"]
+
+
 config = pulumi.Config()
 
 
@@ -119,7 +121,7 @@ short_deployment(Api)
 short_service(Api, {8000: 8000}, [])
 
 short_deployment(Fe)
-short_service(Fe, {443: 443}, ["192.168.1.240"])
+short_service(Fe, {443: 443}, [environ["FE_ADDR"]])
 
 Service(
     "skimmer-db",
@@ -129,9 +131,11 @@ Service(
         cluster_ip="None",
     ),
 )
-Endpoints("skimmer-db", metadata=ObjectMetaArgs(name="skimmer-db"), subsets=[{"addresses": [{"ip": "192.168.1.240"}]}])
+Endpoints(
+    "skimmer-db", metadata=ObjectMetaArgs(name="skimmer-db"), subsets=[{"addresses": [{"ip": environ["DB_ADDR"]}]}]
+)
 
 migrate = local.run(
-    archive_paths=[], command=f"atlas migrate apply --dir file://../migrations --url {os.environ['DB_URI']}"
+    archive_paths=[], command=f"atlas migrate apply --dir file://../migrations --url {environ['DB_URI']}"
 )
 pulumi.export("migration", migrate.stdout)

@@ -26,7 +26,13 @@ schema = {
         "WORKER_DB_URI",
     },
     "react": {"REACT_APP_SKIMMER_API_URL"},
-    "k8s": {"PULUMI_KEY", "DB_URI"},
+    "k8s": {
+        "PULUMI_KEY",
+        "DB_URI",
+        "DB_ADDR",
+        "FE_ADDR",
+        "IMAGE_REGISTRY",
+    },
 }
 
 config.read(".env")
@@ -46,9 +52,9 @@ for section, pairs in config.items():
 with open(".env", "w") as fh:
     config.write(fh)
 
-for s in ("flask", "react", "worker"):
+for s in ("flask", "react", "worker", "k8s"):
     with open(f"{s}/.env", "w") as fh:
-        for k, v in config["flask"].items():
+        for k, v in config[s].items():
             print(f"{k}={v}", file=fh)
 
 if not (os.path.isfile("react/nginx/key.pem") and os.path.isfile("react/nginx/cert.pem")):
