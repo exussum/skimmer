@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
+import { SKIMMER_API_URL } from "./config";
 import Backend from "i18next-http-backend";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -20,7 +21,7 @@ i18n
     lng: "en",
     ns: "ns",
     backend: {
-      loadPath: "http://localhost:8000/i18n/get",
+      loadPath: SKIMMER_API_URL + "/i18n/get",
     },
   });
 

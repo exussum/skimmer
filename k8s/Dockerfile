@@ -16,6 +16,5 @@ RUN \
     tar xzvf /tmp/pulimi.tgz -C /tmp && \
     mv /tmp/pulumi/* /usr/bin && \
     /usr/bin/pulumi login --local && \
-    /usr/bin/pulumi plugin install resource kubernetes 4.6.1 && \
-    /usr/bin/pulumi plugin install resource kubernetes 0.9.2
+    /usr/bin/pulumi plugin install resource kubernetes 4.6.1
 ENTRYPOINT /bin/sh
