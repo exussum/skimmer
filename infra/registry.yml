@@ -1,0 +1,28 @@
+---
+  - name: storage server
+    hosts: 127.0.0.1
+    connection: local
+
+    tasks:
+      - name: install docker-ce
+        apt:
+          name: docker-ce
+          state: present
+
+      - name: install docker-ce-cli
+        apt:
+          name: docker-ce-cli
+          state: present
+
+      - name: Make sure pg is started
+        ansible.builtin.systemd_service:
+          state: started
+          name: docker
+
+      - name: Start up registry
+        docker_container:
+          name: registry
+          image: registry:2.7
+          state: started
+          ports:
+            - "32000:5000"
