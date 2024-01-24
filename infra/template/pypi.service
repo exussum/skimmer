@@ -1,0 +1,23 @@
+[Unit]
+Description=pypi-server
+after=network.target
+
+
+[Service]
+Type=simple
+PIDFile=/run/pypi-server.pid
+User=root
+Group=root
+
+ExecStart=/usr/local/bin/pypi-server run -p 8080 -a . -P . --log-file /var/log/pypi-server.log /var/www/pypi
+ExecStop=/bin/kill -TERM $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+
+WorkingDirectory=/var/www/pypi
+
+TimeoutStartSec=3
+RestartSec=5
+
+[Install]
+wantedBy=multi-user.target

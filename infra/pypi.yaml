@@ -1,0 +1,33 @@
+---
+  - name: storage server
+    hosts: 127.0.0.1
+    connection: local
+
+    tasks:
+      - name: setup pypi directories
+        ansible.builtin.file:
+          path: /var/www/pypi
+          recurse: true
+          owner: root
+          group: root
+          mode: '1777'
+      - name: Create pypi service file
+        ansible.builtin.template:
+          src: template/pypi.service
+          dest: /etc/systemd/system/pypi.service
+          owner: root
+          group: root
+          mode: '0644'
+      - name: ensure file exists
+        copy:
+          content: ""
+          dest: /var/log/pypi-server.log
+          force: false
+          group: www-data
+          owner: www-data
+          mode: 0555
+      - name: Make sure pypi is started
+        ansible.builtin.systemd_service:
+          state: started
+          name: pypi
+          daemon_reload: true
