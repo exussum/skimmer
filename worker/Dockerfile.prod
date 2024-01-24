@@ -1,0 +1,3 @@
+FROM registry.exussum.org:32000/skimmer-worker
+COPY ./worker/skimmer /app/skimmer
+CMD python skimmer/healthcheck.py && dramatiq -p 2 -f skimmer.worker:scheduler skimmer.worker
