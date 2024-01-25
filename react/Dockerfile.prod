@@ -1,4 +1,4 @@
-FROM skimmer-fe as skimmer-fe-build
+FROM skimmer-fe-arm as skimmer-fe-build
 WORKDIR /app
 COPY react/src /app/src
 COPY react/public /app/public

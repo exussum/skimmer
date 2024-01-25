@@ -13,7 +13,7 @@ requests==2.31.0
 six==1.16.0
 tzlocal==5.2
 urllib3==2.1.0
-watchdog==3.0.0
 watchdog-gevent==0.1.1
+watchdog==3.0.0
 zope.event==5.0
 zope.interface==6.1

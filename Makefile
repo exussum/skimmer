@@ -1,12 +1,12 @@
 export DOCKER_BUILDKIT = 1
 
 build:
-	docker buildx build --platform=linux/arm64/v8,linux/amd64 --push --progress plain -t registry.exussum.org:32000/skimmer-worker worker
-	docker buildx build --platform=linux/arm64/v8,linux/amd64 --push --progress plain -t registry.exussum.org:32000/skimmer-worker-prod  -f worker/Dockerfile.prod .
-	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-fe react
-	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-fe-prod -f react/Dockerfile.prod .
-	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-api flask
-	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-api-prod -f flask/Dockerfile.prod .
+	docker buildx build --platform=linux/arm64/v8 --progress plain -o /tmp/skimmer-api-arm    -t skimmer-api-arm flask
+	docker buildx build --platform=linux/arm64/v8 --progress plain -o /tmp/skimmer-worker-arm -t skimmer-worker-arm worker
+	docker buildx build --platform=linux/arm64/v8 --progress plain -o /tmp/skimmer-fe-arm     -t skimmer-fe-arm react
+	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-worker-prod --build-context="skimmer-worker-arm=/tmp/skimmer-worker-arm" --load -f worker/Dockerfile.prod .
+	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-fe-prod     --build-context="skimmer-fe-arm=/tmp/skimmer-fe-arm"         --load -f react/Dockerfile.prod .
+	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-api-prod    --build-context="skimmer-api-arm=/tmp/skimmer-api-arm"       --load -f flask/Dockerfile.prod .
 push:
 	docker tag skimmer-api-prod registry.exussum.org:32000/skimmer-api-prod
 	docker tag skimmer-fe-prod registry.exussum.org:32000/skimmer-fe-prod
