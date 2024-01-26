@@ -4,7 +4,7 @@ from urllib.parse import urlencode, urlsplit, urlunsplit
 
 from skimmer.config import Config
 from skimmer.dal.google import submit_oauth_code
-from skimmer.dal.queries import add_user, create_or_update_channel, id_for_email
+from skimmer.dal.queries import add_user, id_for_email
 
 RANDOM_CHARACTERS = string.ascii_lowercase + string.digits
 
@@ -24,11 +24,9 @@ def oauth_token_req():
             ("response_type", "code"),
             (
                 "scope",
-                "openid profile email https://www.googleapis.com/auth/gmail.readonly",
+                "openid profile email",
             ),
             ("state", state),
-            ("access_type", "offline"),
-            ("prompt", "consent"),
         )
     )
     return state, urlunsplit(parts[:3] + (params,) + parts[4:])

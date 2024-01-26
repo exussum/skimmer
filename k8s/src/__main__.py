@@ -69,7 +69,7 @@ class Api:
     name = "skimmer-api"
     image_name = f"{REGISTRY}/skimmer-api-prod:latest"
     env_vars = [
-        "CHANNEL_GOOGLE_REDIRECT_URL",
+        "FLASK_CHANNEL_URL",
         "FLASK_PERMANENT_SESSION_LIFETIME",
         "FLASK_SQLALCHEMY_DATABASE_URI",
         "FLASK_SECRET_KEY",

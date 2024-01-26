@@ -1,6 +1,7 @@
 import logging
 from collections import namedtuple as nt
 from datetime import datetime, timedelta
+from urllib.parse import urlencode, urlsplit, urlunsplit
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics import accuracy_score
@@ -8,7 +9,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
 from skimmer.config import Config
-from skimmer.dal.google import fetch_messages as google_fetch_messages
+from skimmer.dal import google
 from skimmer.dal.models import SYSTEM_GROUP_GENERAL, ChannelType
 from skimmer.dal.queries import (
     add_group,
@@ -23,15 +24,44 @@ from skimmer.dal.queries import (
     message_handler,
 )
 
-logger = logging.getLogger(__name__)
-
-_TYPE_TO_PATH = {ChannelType.Google: Config.Channel.CHANNEL_GOOGLE_REDIRECT_URL}
-_CHANNEL_TYPE_TO_DAL = {ChannelType.Google: google_fetch_messages}
-
 ChannelSub = nt("ChannelResult", "id channel_type add_path")
 
 
-def create_or_update_channel(user_id, access_token, refresh_token, type):
+def _build_url(base, **params):
+    parts = urlsplit(base)
+    return urlunsplit(parts[:3] + (urlencode(tuple(params.items())),) + parts[4:])
+
+
+class GoogleChannel:
+    fetch_messages = google.fetch_messages
+    _redirect_url = _build_url(Config.Flask.FLASK_CHANNEL_URL + "/code", type=ChannelType.Google.value)
+
+    @staticmethod
+    def auth_url():
+        return _build_url(
+            Config.Google.URL_AUTH,
+            client_id=Config.Google.GOOGLE_CLIENT_ID,
+            redirect_uri=GoogleChannel._redirect_url,
+            response_type="code",
+            scope="https://www.googleapis.com/auth/gmail.readonly",
+            access_type="offline",
+            prompt="consent",
+        )
+
+    @staticmethod
+    def submit_code(code):
+        return google.submit_oauth_code_for_messages(code, GoogleChannel._redirect_url)
+
+
+_TYPE_TO_CHANNEL = {ChannelType.Google.value: GoogleChannel}
+
+
+def auth_url(type):
+    return _TYPE_TO_CHANNEL[type].auth_url()
+
+
+def submit_code(user_id, type, code):
+    access_token, refresh_token = _TYPE_TO_CHANNEL[type].submit_code(code)
     channel_id = create_or_update_channel_query(user_id, access_token, refresh_token, type)
     add_group(user_id, channel_id, SYSTEM_GROUP_GENERAL, True)
     return channel_id
@@ -40,7 +70,10 @@ def create_or_update_channel(user_id, access_token, refresh_token, type):
 def fetch_channels(user_id):
     result = {e: None for e in ChannelType}
     result.update({type: id for (id, type) in fetch_channels_query(user_id)})
-    return [ChannelSub(v, k.value, _TYPE_TO_PATH[k]) for (k, v) in result.items()]
+    return [
+        ChannelSub(v, k.value, _build_url(Config.Flask.FLASK_CHANNEL_URL + "/start", type=k.value))
+        for (k, v) in result.items()
+    ]
 
 
 def predict(old_messages, new_messages):
@@ -61,7 +94,7 @@ def update_messages_from_service(channel_id):
         return
 
     local_messages = list(fetch_messages(channel.user_id, channel.id, True))
-    remote_messages = list(_CHANNEL_TYPE_TO_DAL[channel.type](channel.user_id))
+    remote_messages = list(_TYPE_TO_CHANNEL[channel.type.value].fetch_messages(channel.user_id))
 
     local_ids = set(e.external_id for e in local_messages)
     remote_ids = set(e.id for e in remote_messages)

@@ -1,5 +1,6 @@
 import email
 import string
+import sys
 from base64 import urlsafe_b64decode
 from datetime import datetime
 from email import policy, utils
@@ -33,7 +34,23 @@ def submit_oauth_code(code):
     result.raise_for_status()
     js = result.json()
     result = jwt.decode(js["id_token"], options={"verify_signature": False})
-    return result["email"], js["access_token"], js["refresh_token"]
+    return result["email"]
+
+
+def submit_oauth_code_for_messages(code, redirect):
+    result = requests.post(
+        Config.Google.URL_TOKEN,
+        {
+            "grant_type": "authorization_code",
+            "client_id": Config.Google.GOOGLE_CLIENT_ID,
+            "client_secret": Config.Google.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": redirect,
+            "code": code,
+        },
+    )
+    result.raise_for_status()
+    js = result.json()
+    return js["access_token"], js["refresh_token"]
 
 
 def refresh_access_token(token):

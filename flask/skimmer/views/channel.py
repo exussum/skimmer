@@ -2,15 +2,22 @@ from email.utils import parseaddr
 
 from flask import Blueprint, redirect, request, session
 from skimmer.api import auth, channel, flask
+from skimmer.config import Config
 
 bp = Blueprint("channel", __name__)
 
 
-@bp.route("/add_google")
-def add_google():
-    session["state"], url = auth.oauth_token_req()
-    session["add_google"] = True
-    return redirect(url)
+@bp.route("/start")
+@flask.protect
+def start(user_id):
+    return redirect(channel.auth_url(request.args.get("type")))
+
+
+@bp.route("/code")
+@flask.protect
+def code(user_id):
+    channel.submit_code(user_id, request.args.get("type"), request.args.get("code"))
+    return redirect(Config.React.REACT_HOME_URL)
 
 
 @bp.route("/<id>", methods=["DELETE"])
