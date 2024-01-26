@@ -30,6 +30,7 @@ def get_vars(x):
 def short_deployment(config):
     Deployment(
         config.name,
+        metadata=ObjectMetaArgs(name=config.name),
         spec=DeploymentSpecArgs(
             selector=LabelSelectorArgs(match_labels=config.selector),
             replicas=config.replicas,

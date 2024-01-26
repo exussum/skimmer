@@ -31,13 +31,11 @@ def code():
         if id := id_for_email(email):
             session["email"] = email
             session["user_id"] = id
-            session.modified = True
+            session.permanent = True
             resp.set_cookie("guest", "false")
 
             if add_google:
-                create_or_update_channel(
-                    id, access_token, refresh_token, ChannelType.Google
-                )
+                create_or_update_channel(id, access_token, refresh_token, ChannelType.Google)
         else:
             resp.set_cookie("guest", "true")
     else:
@@ -57,10 +55,7 @@ def whoami():
         channels = fetch_channels(session["user_id"])
         return {
             "email": session["email"],
-            "channels": [
-                {"channel_type": e.channel_type, "id": e.id, "add_path": e.add_path}
-                for e in channels
-            ],
+            "channels": [{"channel_type": e.channel_type, "id": e.id, "add_path": e.add_path} for e in channels],
         }
     else:
         session.permanent = False
