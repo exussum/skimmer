@@ -50,7 +50,7 @@ export const MessageList = ({ messages, groups, setGroup, hide }) => {
       hide={hide}
     />
   ));
-  return <div className="px-2 bg-menu grid grid-cols-[28px_200px_auto_250px_auto]">{items}</div>;
+  return <div className="grid border-4 border-menu gap-y-1 grid-cols-[28px_200px_auto_250px_auto]">{items}</div>;
 };
 
 const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }) => {
@@ -66,7 +66,7 @@ const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }
     <>
       <div
         data-message-id={id}
-        className="py-2 pr-2"
+        className="py-2 pr-2 bg-menu"
         onClick={(e) => {
           for (const n of e.currentTarget.parentNode.querySelectorAll(`[data-message-id='${id}']`)) {
             n.style.display = "none";
@@ -89,29 +89,31 @@ const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }
           />
         </svg>
       </div>
-      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
+      <div data-message-id={id} className="p-2 bg-menu text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
         {from}
       </div>
-      <div data-message-id={id} className="p-2 {BLUR} overflow-hidden">
+      <div data-message-id={id} className="p-2 bg-menu {BLUR} overflow-hidden">
         <div className="text-ellipsis overflow-hidden whitespace-nowrap">
           <b>{subject}</b>
         </div>
         <div className="text-ellipsis line-clamp-2 text-sm">{body}</div>
       </div>
-      <div data-message-id={id} className="p-2">
+      <div data-message-id={id} className="bg-menu p-2">
         {localDate}
       </div>
-      <select
-        data-message-id={id}
-        className="bg-menu py-2 p-2"
-        onChange={(e) => {
-          e.stopPropagation();
-          setGroup(e.target.value, [id]);
-        }}
-        value={groupId}
-      >
-        {selectItems}
-      </select>
+      <div className="bg-menu py-2 p-2">
+        <select
+          className="bg-menu"
+          data-message-id={id}
+          onChange={(e) => {
+            e.stopPropagation();
+            setGroup(e.target.value, [id]);
+          }}
+          value={groupId}
+        >
+          {selectItems}
+        </select>
+      </div>
     </>
   );
 };
