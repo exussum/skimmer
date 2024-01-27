@@ -8,10 +8,10 @@ module.exports = {
   ],
   theme: {
     colors: {
-      wallpaper: "#22092C",
-      content: "#872341",
-      menu: "#BE3144",
-      popup: "#F05941",
+      wallpaper: "#aec3b0",
+      content: "#01161e",
+      menu: "#124559",
+      popup: "#598392",
     },
   },
 };

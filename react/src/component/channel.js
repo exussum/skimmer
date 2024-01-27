@@ -46,13 +46,14 @@ export const MessageList = ({ messages, groups, setGroup, hide }) => {
       setGroup={setGroup}
       id={e.id}
       groupId={e.groupId}
+      body={e.body}
       hide={hide}
     />
   ));
   return <div className="px-2 bg-menu grid grid-cols-[28px_200px_auto_250px_auto]">{items}</div>;
 };
 
-const Item = ({ id, from, subject, sent, groups, setGroup, groupId, hide }) => {
+const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }) => {
   const localDate = new Date(sent).toLocaleString("en-US");
 
   const selectItems = groups.map((e) => (
@@ -91,8 +92,11 @@ const Item = ({ id, from, subject, sent, groups, setGroup, groupId, hide }) => {
       <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
         {from}
       </div>
-      <div data-message-id={id} className="p-2 text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
-        {subject}
+      <div data-message-id={id} className="p-2 {BLUR} overflow-hidden">
+        <div className="text-ellipsis overflow-hidden whitespace-nowrap">
+          <b>{subject}</b>
+        </div>
+        <div className="text-ellipsis line-clamp-2 text-sm">{body}</div>
       </div>
       <div data-message-id={id} className="p-2">
         {localDate}

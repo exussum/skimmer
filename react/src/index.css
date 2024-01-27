@@ -11,21 +11,25 @@
 .btn-skimmer:hover,
 .btn-skimmer:active,
 .btn-skimmer {
-  --bs-btn-active-bg: #f05941;
+  --bs-btn-active-bg: #598392;
   --bs-btn-active-color: white;
-  --bs-btn-bg: #f05941;
+  --bs-btn-bg: #598392;
   --bs-btn-border-color: unset;
   --bs-btn-border-width: unset;
   --bs-btn-box-shadow: unset;
   --bs-btn-color: white;
   --bs-btn-hover-border-color: unset;
-  background-color: #f05941;
+  background-color: #598392;
 }
 
 .dropdown-menu-skimmer,
 .dropdown-menu-skimmer:hover {
-  --bs-body-bg: #be3144;
+  --bs-body-bg: #124559;
+  --bs-btn-border-width: 1px;
+  --bs-btn-border-color: #ffffff;
   --bs-dropdown-link-color: white;
   --bs-dropdown-link-hover-color: white;
-  --bs-dropdown-link-hover-bg: #f05941;
+  --bs-dropdown-link-hover-bg: #598392;
+  border-color: white;
+  border-width: 2px;
 }

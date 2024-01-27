@@ -84,7 +84,11 @@ class _FetchMessages:
         html_content = next((e for e in message.walk() if e.get_content_type() == "text/html"), None)
 
         self.result[id] = ExternalMessage(
-            resp["id"], sent, frm, subject, strip_html((text_content or html_content).get_content())
+            resp["id"],
+            sent,
+            frm,
+            subject,
+            (text_content and text_content.get_content().strip()) or strip_html(html_content.get_content()),
         )
 
     @classmethod
