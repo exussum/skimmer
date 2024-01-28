@@ -101,10 +101,9 @@ const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }
       <div data-message-id={id} className="bg-menu p-2">
         {localDate}
       </div>
-      <div className="bg-menu py-2 p-2">
+      <div className="bg-menu py-2 p-2" data-message-id={id}>
         <select
           className="bg-menu"
-          data-message-id={id}
           onChange={(e) => {
             e.stopPropagation();
             setGroup(e.target.value, [id]);
