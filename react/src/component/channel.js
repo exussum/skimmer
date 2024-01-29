@@ -4,14 +4,22 @@ import { useCallback } from "react";
 
 const BLUR = " "; /* blur-sm */
 
-export const ChannelNav = ({ channels, className, onSelect }) => {
+const styles = {
+  "left-column": "lg:w-48 space-y-4 pr-8 md:w-24 md:pr-2",
+  "messages-layout": "grid-cols-[28px_auto_auto_auto] md:grid-cols-[28px_auto_200px_auto]",
+  "messages-clamp": "lg:line-clamp-2 line-clamp-4",
+  "messages-from-text-wrap": "md:flex-wrap",
+  "messages-date": "hidden md:block",
+};
+
+export const ChannelNav = ({ channels, onSelect }) => {
   const buttons = channels.map((e) => <Channel key={e.id} channelType={e.channelType} id={e.id} onClick={onSelect} />);
 
   const { t } = useTranslation();
 
   return (
     <div className="flex">
-      <ul className={`flex-column space-y space-y-4 ${className}`}>
+      <ul className={`flex-column space-y ${styles["left-column"]}`}>
         <li>{t("Channels Title")}</li>
         {buttons}
       </ul>
@@ -50,11 +58,11 @@ export const MessageList = ({ messages, groups, setGroup, hide }) => {
       hide={hide}
     />
   ));
-  return <div className="grid border-4 border-menu gap-y-1 grid-cols-[28px_200px_auto_250px_auto]">{items}</div>;
+  return <div className={`grid border-4 border-menu gap-y-1 ${styles["messages-layout"]}`}>{items}</div>;
 };
 
 const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }) => {
-  const localDate = new Date(sent).toLocaleString("en-US");
+  const localDate = new Date(sent).toLocaleString("en-US").replace(",", " ");
 
   const selectItems = groups.map((e) => (
     <option value={e.id} key={e.id}>
@@ -89,17 +97,20 @@ const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }
           />
         </svg>
       </div>
-      <div data-message-id={id} className="p-2 bg-menu text-ellipsis overflow-hidden whitespace-nowrap {BLUR}">
-        {from}
-      </div>
-      <div data-message-id={id} className="p-2 bg-menu {BLUR} overflow-hidden">
-        <div className="text-ellipsis overflow-hidden whitespace-nowrap">
-          <b>{subject}</b>
+      <div
+        data-message-id={id}
+        className={`p-2 overflow-hidden bg-menu ${BLUR} flex flex-row ${styles["messages-from-text-wrap"]}`}
+      >
+        <div className="basis-[100px] shrink-0 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
+        <div className="basis-[150px] flex-1 overflow-hidden flow-0">
+          <div className="text-ellipsis overflow-hidden whitespace-nowrap">
+            <b>{subject}</b>
+          </div>
+          <div className={`text-ellipsis overflow-hidden whitespace-wrap ${styles["messages-clamp"]}`}>{body}</div>
         </div>
-        <div className="text-ellipsis line-clamp-2 text-sm">{body}</div>
       </div>
       <div data-message-id={id} className="bg-menu p-2">
-        {localDate}
+        <span className={styles["messages-date"]}>{localDate}</span>
       </div>
       <div className="bg-menu py-2 p-2" data-message-id={id}>
         <select

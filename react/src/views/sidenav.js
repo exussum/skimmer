@@ -6,9 +6,9 @@ export const SideNav = (props) => {
   const { ctx, setCtx } = useContext(AuthContext);
   const select = useChannel(ctx, setCtx);
   if (ctx && ctx.subbedChannels.length) {
-    return <ChannelNav className={props.className} onSelect={select} channels={ctx.subbedChannels} />;
+    return <ChannelNav onSelect={select} channels={ctx.subbedChannels} />;
   }
-  return <div className={props.className}></div>;
+  return <div></div>;
 };
 
 const useChannel = (ctx, setCtx) => {

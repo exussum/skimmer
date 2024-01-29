@@ -40,7 +40,7 @@ const App = () => {
           {ctx.email ? (
             <div className="grow">
               <div className="h-full flex">
-                <SideNav className="w-48 pr-8" />
+                <SideNav />
                 <Content />
               </div>
             </div>
