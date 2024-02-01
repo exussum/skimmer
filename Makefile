@@ -25,4 +25,4 @@ source:
 	cd react && docker run --progress plain -ti -v ./dependencies:/tmp/dependencies skimmer-fe sh -c 'cp -r /app/node_modules/* /tmp/dependencies'
 
 migrate:
-	cd tf; atlas migrate hash; atlas migrate apply --env local
+	cd k8s; atlas migrate hash; atlas migrate apply --env local

@@ -2,12 +2,20 @@ import { useTranslation } from "react-i18next";
 import Modal from "react-bootstrap/Modal";
 import Dropdown from "react-bootstrap/Dropdown";
 
+const styles = {
+  "menu-user-email": "hidden sm:inline",
+  "menu-user-hamburger": "inline sm:hidden",
+};
+
 export const GuestUserWarning = ({ onClick }) => {
   const { t } = useTranslation();
 
   return (
     <Modal show={true} onHide={onClick}>
-      <Modal.Body>
+      <Modal.Header closeButton className="bg-popup dialog-header">
+        <Modal.Title>{t("Error Alert")}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="bg-popup">
         <div className="space-y-6">
           <p className="text-base leading-relaxed">{t("Contact the owner to be added")}</p>
         </div>
@@ -33,7 +41,10 @@ export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
 
   return (
     <Dropdown>
-      <Dropdown.Toggle variant="skimmer">{login}</Dropdown.Toggle>
+      <Dropdown.Toggle variant="skimmer">
+        <span className={`${styles["menu-user-hamburger"]}`}>&#9776;</span>
+        <span className={`${styles["menu-user-email"]}`}>{login}</span>
+      </Dropdown.Toggle>
       <Dropdown.Menu variant="skimmer">
         {channelItems}
         <Dropdown.Divider />

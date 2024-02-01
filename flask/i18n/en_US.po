@@ -23,9 +23,8 @@ msgstr "Groups"
 msgid "Messages Title"
 msgstr "Messages"
 
-
-
-
+msgid "Error Alert"
+msgstr "Error!"
 
 msgid "Show group manager"
 msgstr "Groups"

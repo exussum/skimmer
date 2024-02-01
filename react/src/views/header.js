@@ -5,7 +5,7 @@ import { useContext, useEffect } from "react";
 
 import { useCookies } from "react-cookie";
 
-export const Header = (props) => {
+export const Header = ({ className }) => {
   const { ctx, setCtx } = useContext(AuthContext);
 
   const component = {
@@ -24,7 +24,7 @@ export const Header = (props) => {
   }[ctx.status];
 
   return (
-    <div className={`flex ${props.className}`}>
+    <div className={`flex ${className}`}>
       <div className="flex-1">Skimmer</div>
       <div className="flex-none">{component}</div>
     </div>
@@ -37,7 +37,6 @@ const UnknownUser = () => {
   useEffect(() => {
     if (!isLoading) {
       if (error || !data.email) {
-        console.log(error);
         setCtx({ status: "anonymous" });
       } else {
         const activeChannels = data.channels.filter((e) => e.id);

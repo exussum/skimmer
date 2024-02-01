@@ -35,11 +35,11 @@ const App = () => {
   return (
     <AuthContext.Provider value={{ ctx, setCtx }}>
       <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen flex flex-col mx-8 px-8 pt-8 bg-content rounded-l">
+        <div className="min-h-screen flex flex-col md:mx-8 px-8 pt-8 bg-content rounded-l">
           <Header className="basis-16 border-0 border-b-2 border-solid border-b-menu" />
           {ctx.email ? (
             <div className="grow">
-              <div className="h-full flex">
+              <div className="h-full flex flex-col sm:flex-row">
                 <SideNav />
                 <Content />
               </div>

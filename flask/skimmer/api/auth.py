@@ -27,6 +27,7 @@ def oauth_token_req():
                 "openid profile email",
             ),
             ("state", state),
+            ("prompt", "select_account"),
         )
     )
     return state, urlunsplit(parts[:3] + (params,) + parts[4:])
