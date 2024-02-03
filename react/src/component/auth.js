@@ -1,11 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Modal from "react-bootstrap/Modal";
 import Dropdown from "react-bootstrap/Dropdown";
-
-const styles = {
-  "menu-user-email": "hidden sm:inline",
-  "menu-user-hamburger": "inline sm:hidden",
-};
+import styles from "../styles";
 
 export const GuestUserWarning = ({ onClick }) => {
   const { t } = useTranslation();

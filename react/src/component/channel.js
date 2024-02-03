@@ -1,18 +1,10 @@
 import Button from "react-bootstrap/Button";
-import Dropdown from "react-bootstrap/Dropdown";
 import { useTranslation } from "react-i18next";
-import { useState, useCallback } from "react";
+import Select from "./select";
+import { useCallback } from "react";
+import styles from "../styles";
 
 const BLUR = " "; /* blur-sm */
-
-const styles = {
-  "left-column": "lg:w-48 space-y-4 pr-8 md:w-24 md:pr-2",
-  "messages-layout": "grid-cols-[28px_auto_auto_auto] md:grid-cols-[28px_auto_200px_auto]",
-  "messages-clamp": "lg:line-clamp-2 line-clamp-4",
-  "messages-from-text-wrap": "md:flex-wrap",
-  "messages-date": "hidden md:block",
-  "messages-group-dropdown-name": "hidden sm:inline",
-};
 
 export const ChannelNav = ({ channels, onSelect }) => {
   const buttons = channels.map((e) => <Channel key={e.id} channelType={e.channelType} id={e.id} onClick={onSelect} />);
@@ -61,42 +53,6 @@ export const MessageList = ({ messages, groups, setGroup, hide }) => {
     />
   ));
   return <div className={`grid border-4 border-menu gap-y-1 ${styles["messages-layout"]}`}>{items}</div>;
-};
-
-const Select = ({ options, selected, callback }) => {
-  const find = () => {
-    const found = options.find((e) => e[0] === selected);
-    if (found) {
-      return found[1];
-    } else if (options) {
-      return options[0][1];
-    } else {
-      return "";
-    }
-  };
-
-  const [selectedText, setSelectedText] = useState(find());
-
-  const selectItems = options.map(([v, txt]) => (
-    <Dropdown.Item eventKey={[v, txt]} key={`message-item-${v}-${txt}`} active={selectedText === txt}>
-      {txt}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <Dropdown
-      onSelect={(key, _) => {
-        const [v, txt] = key.split(",", 2);
-        setSelectedText(txt);
-        callback(v);
-      }}
-    >
-      <Dropdown.Toggle variant="skimmer">
-        <span className={styles["messages-group-dropdown-name"]}>{selectedText}</span>
-      </Dropdown.Toggle>
-      <Dropdown.Menu variant="skimmer">{selectItems}</Dropdown.Menu>
-    </Dropdown>
-  );
 };
 
 const Item = ({ id, body, from, subject, sent, groups, setGroup, groupId, hide }) => {
