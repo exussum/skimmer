@@ -13,6 +13,7 @@ from skimmer.dal import google
 from skimmer.dal.models import SYSTEM_GROUP_GENERAL, ChannelType
 from skimmer.dal.queries import (
     add_group,
+    bulk_message_handler,
     create_or_update_channel as create_or_update_channel_query,
     delete_channel as delete_channel_query,
     delete_groups,
@@ -21,10 +22,9 @@ from skimmer.dal.queries import (
     fetch_channels as fetch_channels_query,
     fetch_groups,
     fetch_messages,
-    message_handler,
 )
 
-ChannelSub = nt("ChannelResult", "id channel_type add_path")
+ChannelSub = nt("ChannelResult", "id channel_type identity add_path")
 
 
 def _build_url(base, **params):
@@ -43,7 +43,7 @@ class GoogleChannel:
             client_id=Config.Google.GOOGLE_CLIENT_ID,
             redirect_uri=GoogleChannel._redirect_url,
             response_type="code",
-            scope="https://www.googleapis.com/auth/gmail.readonly",
+            scope="openid profile email https://www.googleapis.com/auth/gmail.readonly",
             access_type="offline",
             prompt="consent",
         )
@@ -61,18 +61,17 @@ def auth_url(type):
 
 
 def submit_code(user_id, type, code):
-    access_token, refresh_token = _TYPE_TO_CHANNEL[type].submit_code(code)
-    channel_id = create_or_update_channel_query(user_id, access_token, refresh_token, type)
+    email, access_token, refresh_token = _TYPE_TO_CHANNEL[type].submit_code(code)
+    channel_id = create_or_update_channel_query(user_id, access_token, refresh_token, type, email)
     add_group(user_id, channel_id, SYSTEM_GROUP_GENERAL, True)
     return channel_id
 
 
 def fetch_channels(user_id):
-    result = {e: None for e in ChannelType}
-    result.update({type: id for (id, type) in fetch_channels_query(user_id)})
-    return [
-        ChannelSub(v, k.value, _build_url(Config.Flask.FLASK_CHANNEL_URL + "/start", type=k.value))
-        for (k, v) in result.items()
+    channels = fetch_channels_query(user_id)
+    builder = lambda e: _build_url(Config.Flask.FLASK_CHANNEL_URL + "/start", type=e.value)
+    return [ChannelSub(id, type.value, identity, builder(type)) for (id, type, identity) in channels] + [
+        ChannelSub(None, e.value, None, builder(e)) for e in ChannelType
     ]
 
 
@@ -94,7 +93,7 @@ def update_messages_from_service(channel_id):
         return
 
     local_messages = list(fetch_messages(channel.user_id, channel.id, True))
-    remote_messages = list(_TYPE_TO_CHANNEL[channel.type.value].fetch_messages(channel.user_id))
+    remote_messages = list(_TYPE_TO_CHANNEL[channel.type.value].fetch_messages(channel_id))
 
     local_ids = set(e.external_id for e in local_messages)
     remote_ids = set(e.id for e in remote_messages)
@@ -104,7 +103,7 @@ def update_messages_from_service(channel_id):
     if new_messages:
         group_ids = predict(local_messages, new_messages) if local_messages else [default_group.id] * len(new_messages)
 
-        with message_handler(channel.user_id) as mh:
+        with bulk_message_handler(channel.user_id) as mh:
             for message, group_id in zip(new_messages, group_ids):
                 mh.add(
                     external_id=message.id,

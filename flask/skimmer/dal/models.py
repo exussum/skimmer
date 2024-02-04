@@ -36,6 +36,7 @@ class Channel(Base):
     __tablename__ = "channel"
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[ChannelType]
+    identity: Mapped[str]
     access_token: Mapped[str]
     refresh_token: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))

@@ -42,7 +42,7 @@ def queue_update_channels():
         curs.execute("SELECT id FROM channel")
         while rows := curs.fetchmany(10):
             for e in rows:
-                refresh_channel.send(rows[0])
+                refresh_channel.send(e[0])
 
 
 @contextmanager

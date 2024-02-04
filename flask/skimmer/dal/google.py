@@ -50,7 +50,8 @@ def submit_oauth_code_for_messages(code, redirect):
     )
     result.raise_for_status()
     js = result.json()
-    return js["access_token"], js["refresh_token"]
+    result = jwt.decode(js["id_token"], options={"verify_signature": False})
+    return result["email"], js["access_token"], js["refresh_token"]
 
 
 def refresh_access_token(token):
@@ -67,8 +68,14 @@ def refresh_access_token(token):
     return result.json()["access_token"]
 
 
-def fetch_messages(user_id):
-    return _call(_FetchMessages.execute, user_id)
+def fetch_messages(channel_id):
+    (user_id, access_token, refresh_token, identity) = fetch_channel_tokens(channel_id)
+    try:
+        return _FetchMessages.execute(access_token)
+    except Exception:
+        access_token = refresh_access_token(refresh_token)
+        create_or_update_channel(user_id, access_token, refresh_token, ChannelType.Google, identity)
+        return _FetchMessages.execute(access_token)
 
 
 class _FetchMessages:
@@ -107,16 +114,6 @@ class _FetchMessages:
 
 def _build_service(token):
     return build("gmail", "v1", credentials=Credentials(token))
-
-
-def _call(f, id):
-    access_token, refresh_token = fetch_channel_tokens(id, ChannelType.Google)
-    try:
-        return f(access_token)
-    except Exception:
-        access_token = refresh_access_token(refresh_token)
-        create_or_update_channel(id, access_token, refresh_token, ChannelType.Google)
-        return f(access_token)
 
 
 def _tag_visible(element):

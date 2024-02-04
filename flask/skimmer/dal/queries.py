@@ -1,6 +1,7 @@
 from collections import namedtuple as nt
+from functools import reduce
 
-from sqlalchemy import column, delete, select, update
+from sqlalchemy import column, delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from skimmer.dal import models as m
@@ -9,6 +10,36 @@ from skimmer.db import db
 session = db.session
 
 Message = nt("Message", "id  sent  sender  subject  body  group_id external_id")
+ChannelStats = nt("ChannelStats", "id type messages_per_group")
+Stats = nt("Stat", "last_message_id channel_stats")
+
+
+def get_stats(user_id, last_id):
+    counts_by_channel_id = (
+        reduce(
+            _stats_query_to_records,
+            db.session.query(m.Channel.id, m.Channel.type, m.Group.name, func.count(m.Message.group_id))
+            .join(m.Group.messages)
+            .join(m.Group.channel)
+            .filter(
+                m.Message.id > last_id, m.Channel.user_id == user_id, m.Group.system == False, m.Message.hidden == False
+            )
+            .group_by(m.Channel.id, m.Group.name, m.Group.channel_id)
+            .all(),
+            {},
+        )
+        if last_id
+        else {}
+    )
+
+    last_message_id = (
+        db.session.query(func.max(m.Message.id))
+        .join(m.Message.group)
+        .join(m.Group.channel)
+        .filter(m.Channel.user_id == user_id)
+    )
+    last_message_id = last_message_id[0] if last_message_id else 0
+    return Stats(last_message_id, list(counts_by_channel_id.values()))
 
 
 def id_for_email(email):
@@ -75,11 +106,26 @@ def fetch_channel(id):
 
 
 def fetch_channels(user_id):
-    return list(session.query(m.Channel.id, m.Channel.type).filter(m.Channel.user_id == user_id))
+    return list(
+        session.query(m.Channel.id, m.Channel.type, m.Channel.identity)
+        .filter(m.Channel.user_id == user_id)
+        .order_by(m.Channel.type, m.Channel.identity)
+    )
 
 
 def add_group(user_id, channel_id, name, system=False):
-    session.add(m.Group(channel_id=channel_id, name=name, system=system))
+    stmt = (
+        insert(m.Group)
+        .values(
+            channel_id=channel_id,
+            name=name,
+            system=system,
+        )
+        .on_conflict_do_nothing(
+            index_elements=[m.Group.name, m.Group.channel_id],
+        )
+    )
+    session.execute(stmt)
     session.commit()
 
 
@@ -95,7 +141,7 @@ def delete_group(user_id, channel_id, id):
     session.commit()
 
 
-def create_or_update_channel(user_id, access_token, refresh_token, type):
+def create_or_update_channel(user_id, access_token, refresh_token, type, identity):
     stmt = (
         insert(m.Channel)
         .values(
@@ -103,9 +149,10 @@ def create_or_update_channel(user_id, access_token, refresh_token, type):
             refresh_token=refresh_token,
             user_id=user_id,
             type=type,
+            identity=identity,
         )
         .on_conflict_do_update(
-            index_elements=[m.Channel.user_id, m.Channel.type],
+            index_elements=[m.Channel.user_id, m.Channel.type, m.Channel.identity],
             set_={"access_token": access_token, "refresh_token": refresh_token},
         )
         .returning(column("id"))
@@ -143,10 +190,10 @@ def delete_groups(user_id, channel_id):
     session.commit()
 
 
-def fetch_channel_tokens(user_id, type):
+def fetch_channel_tokens(channel_id):
     return (
-        session.query(m.Channel.access_token, m.Channel.refresh_token)
-        .filter(m.Channel.user_id == user_id, m.Channel.type == type)
+        session.query(m.Channel.user_id, m.Channel.access_token, m.Channel.refresh_token, m.Channel.identity)
+        .filter(m.Channel.id == channel_id)
         .one_or_none()
     )
 
@@ -172,7 +219,7 @@ def fetch_messages(user_id, channel_id, include_hidden):
     return (Message(*e) for e in result.order_by(m.Message.sent.desc()))
 
 
-class message_handler:
+class bulk_message_handler:
     def __init__(self, user_id):
         self.rows = []
         self.user_id = user_id
@@ -196,3 +243,12 @@ class message_handler:
     def __exit__(self, *args, **kwargs):
         session.execute(insert(m.Message), self.rows)
         session.commit()
+
+
+def _stats_query_to_records(m, e):
+    x = m.get(e.id)
+    if not x:
+        m[e[0]] = ChannelStats(e[0], e[1], {e[2]: e[3]})
+    else:
+        x.messages_per_group[e[2]] = e[3]
+    return m

@@ -106,13 +106,7 @@ const Logout = () => {
 
 const useDeleteChannelClick = (ctx, setCtx) => {
   const onSuccess = async (id) => {
-    const channels = ctx.channels.map((e) => {
-      return {
-        ...e,
-        id: e.id === id ? null : e.id,
-      };
-    });
-
+    const channels = ctx.channels.filter((e) => e.id !== id);
     const subbedChannels = channels.filter((e) => e.id);
 
     if (ctx.selectedChannelId === id) {

@@ -7,12 +7,14 @@ import styles from "../styles";
 const BLUR = " "; /* blur-sm */
 
 export const ChannelNav = ({ channels, onSelect }) => {
-  const buttons = channels.map((e) => <Channel key={e.id} channelType={e.channelType} id={e.id} onClick={onSelect} />);
+  const buttons = channels.map((e) => (
+    <Channel key={e.id} identity={e.identity} channelType={e.channelType} id={e.id} onClick={onSelect} />
+  ));
 
   const { t } = useTranslation();
 
   return (
-    <div className="flex">
+    <div className="flex pb-4">
       <ul className={`flex-column space-y ${styles["left-column"]}`}>
         <li>{t("Channels Title")}</li>
         {buttons}
@@ -21,7 +23,7 @@ export const ChannelNav = ({ channels, onSelect }) => {
   );
 };
 
-const Channel = ({ id, channelType, onClick }) => {
+const Channel = ({ id, channelType, onClick, identity }) => {
   const click = useCallback(
     (e) => {
       onClick(e.currentTarget.value);
@@ -32,6 +34,7 @@ const Channel = ({ id, channelType, onClick }) => {
     <li key={id}>
       <Button onClick={click} variant="skimmer" className="block w-full text-left" value={id}>
         <div className="min-w-full">{channelType}</div>
+        <div className="min-w-full text-xs overflow-hidden text-ellipsis">{identity}</div>
       </Button>
     </li>
   );

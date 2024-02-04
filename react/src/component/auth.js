@@ -31,6 +31,7 @@ export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
         channelType={e.channelType}
         addPath={e.addPath}
         deleteChannel={deleteChannel}
+        identity={e.identity}
       />
     );
   });
@@ -52,7 +53,7 @@ export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
   );
 };
 
-const ChannelItem = ({ id, deleteChannel, addPath, channelType }) => {
+const ChannelItem = ({ id, deleteChannel, addPath, channelType, identity }) => {
   const { t } = useTranslation();
   const action = id ? t("Remove Channel Action") : t("Add Channel Action");
   const onClick = () => {
@@ -64,7 +65,7 @@ const ChannelItem = ({ id, deleteChannel, addPath, channelType }) => {
   };
   return (
     <Dropdown.Item onClick={onClick}>
-      {action} {channelType}
+      {action} {channelType} {identity ? `[${identity}]` : ""}
     </Dropdown.Item>
   );
 };

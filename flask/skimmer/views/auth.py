@@ -52,7 +52,10 @@ def whoami():
         channels = fetch_channels(session["user_id"])
         return {
             "email": session["email"],
-            "channels": [{"channel_type": e.channel_type, "id": e.id, "add_path": e.add_path} for e in channels],
+            "channels": [
+                {"identity": e.identity, "channel_type": e.channel_type, "id": e.id, "add_path": e.add_path}
+                for e in channels
+            ],
         }
     else:
         session.permanent = False
