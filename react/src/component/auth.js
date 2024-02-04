@@ -23,18 +23,21 @@ export const GuestUserWarning = ({ onClick }) => {
 export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
   const { t } = useTranslation();
 
-  const channelItems = channels.map((e, i) => {
-    return (
-      <ChannelItem
-        key={`channel-${i}`}
-        id={e.id}
-        channelType={e.channelType}
-        addPath={e.addPath}
-        deleteChannel={deleteChannel}
-        identity={e.identity}
-      />
-    );
-  });
+  const channelItems = channels
+    .sort()
+    .sort((a, b) => (a.id >= b.id ? 1 : -1))
+    .map((e, i) => {
+      return (
+        <ChannelItem
+          key={`channel-${i}`}
+          id={e.id}
+          channelType={e.channelType}
+          addPath={e.addPath}
+          deleteChannel={deleteChannel}
+          identity={e.identity}
+        />
+      );
+    });
 
   return (
     <Dropdown>

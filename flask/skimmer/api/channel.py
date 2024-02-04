@@ -22,6 +22,7 @@ from skimmer.dal.queries import (
     fetch_channels as fetch_channels_query,
     fetch_groups,
     fetch_messages,
+    get_stats,
 )
 
 ChannelSub = nt("ChannelResult", "id channel_type identity add_path")

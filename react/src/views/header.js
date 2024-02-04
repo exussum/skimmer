@@ -1,25 +1,18 @@
+import { useDeleteChannelMutation, useStatsQuery } from "../api/channel";
 import { AuthContext, useLoginRedirectQuery, useLogoutQuery, useWhoAmIQuery } from "../api/auth";
-import { useDeleteChannelMutation } from "../api/channel";
 import { UserMenu, GuestUserWarning, GoogleButton } from "../component/auth";
-import { useContext, useEffect } from "react";
+import { useRef, useContext, useEffect } from "react";
 
 import { useCookies } from "react-cookie";
 
 export const Header = ({ className }) => {
-  const { ctx, setCtx } = useContext(AuthContext);
+  const { ctx } = useContext(AuthContext);
 
   const component = {
     null: <UnknownUser />,
     auth: <AuthRedirect />,
     logout: <Logout />,
-    known: (
-      <UserMenu
-        login={ctx.email}
-        onClick={() => setCtx({ status: "logout" })}
-        channels={ctx.channels}
-        deleteChannel={useDeleteChannelClick(ctx, setCtx)}
-      />
-    ),
+    known: <KnownUser />,
     anonymous: <Anonymous />,
   }[ctx.status];
 
@@ -31,8 +24,30 @@ export const Header = ({ className }) => {
   );
 };
 
+const KnownUser = () => {
+  const { ctx, setCtx } = useContext(AuthContext);
+  const { data } = useStatsQuery(ctx.lastSeenMessageId);
+
+  if (data) {
+    if (ctx.lastSeenMessageId.current) {
+      Notification.requestPermission().then(() => new Notification("Skimmer has new notifications"));
+    }
+    ctx.lastSeenMessageId.current = data.lastMessageId;
+  }
+
+  return (
+    <UserMenu
+      login={ctx.email}
+      onClick={() => setCtx({ status: "logout" })}
+      channels={ctx.channels}
+      deleteChannel={useDeleteChannelClick(ctx, setCtx)}
+    />
+  );
+};
+
 const UnknownUser = () => {
   const { setCtx, isLoading, data, error } = useWhoAmIQuery();
+  const lastSeenMessageId = useRef("");
 
   useEffect(() => {
     if (!isLoading) {
@@ -46,6 +61,7 @@ const UnknownUser = () => {
           channels: data.channels,
           selectedChannelId: activeChannels.length && activeChannels[0].id,
           subbedChannels: activeChannels,
+          lastSeenMessageId: lastSeenMessageId,
         });
       }
     }

@@ -1,5 +1,7 @@
 import { apiClient } from "../config";
-import { useMutation } from "react-query";
+import { AuthContext } from "../api/auth";
+import { useQuery, useMutation } from "react-query";
+import { useContext } from "react";
 
 export const getChannel = async ({ queryKey }) => {
   return apiClient.get(`/channel/${queryKey[1]}`).then((r) => r.data);
@@ -19,4 +21,13 @@ export const useDeleteChannelMutation = (onSuccess) => {
   return (id) => {
     mutation.mutate({ id: id });
   };
+};
+
+const getStats = async ({ queryKey }) => {
+  return await apiClient.get(`channel/stats?last_message_id=${queryKey[1].current || ""}`).then((r) => r.data);
+};
+
+export const useStatsQuery = (ref) => {
+  const { data } = useQuery(["getStats", ref], getStats, { refetchInterval: 6000 });
+  return { data };
 };

@@ -11,7 +11,7 @@ session = db.session
 
 Message = nt("Message", "id  sent  sender  subject  body  group_id external_id")
 ChannelStats = nt("ChannelStats", "id type messages_per_group")
-Stats = nt("Stat", "last_message_id channel_stats")
+Stats = nt("Stats", "last_message_id channel_stats")
 
 
 def get_stats(user_id, last_id):
@@ -37,7 +37,7 @@ def get_stats(user_id, last_id):
         .join(m.Message.group)
         .join(m.Group.channel)
         .filter(m.Channel.user_id == user_id)
-    )
+    ).first()
     last_message_id = last_message_id[0] if last_message_id else 0
     return Stats(last_message_id, list(counts_by_channel_id.values()))
 
