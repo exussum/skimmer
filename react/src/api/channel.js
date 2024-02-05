@@ -27,6 +27,6 @@ const getStats = async () => {
 };
 
 export const useStatsQuery = () => {
-  const { data } = useQuery(["getStats"], getStats, { refetchInterval: 6000 });
+  const { data } = useQuery(["getStats"], getStats, { refetchIntervalInBackground: true, refetchInterval: 6000 });
   return { data };
 };

@@ -27,7 +27,12 @@ const LoadingContent = ({ channelId }) => {
   const { t } = useTranslation();
   const [messageResults, groupResults] = useQueries({
     queries: [
-      { queryKey: ["channel", channelId], queryFn: getChannel, refetchInterval: 6000 },
+      {
+        queryKey: ["channel", channelId],
+        queryFn: getChannel,
+        refetchInterval: 6000,
+        refetchIntervalInBackground: true,
+      },
       { queryKey: ["groups", channelId], queryFn: fetchGroups },
     ],
   });

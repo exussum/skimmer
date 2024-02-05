@@ -24,15 +24,16 @@ export const SideNav = () => {
     localStorage.setItem("lastSeenMessageId", data.lastMessageId);
   }
 
-  const select = useChannel(ctx, setCtx);
+  const select = useChannel(ctx, setCtx, messageCounts);
   if (ctx && ctx.subbedChannels.length) {
     return <ChannelNav onSelect={select} channels={ctx.subbedChannels} messageCounts={messageCounts} />;
   }
   return <div></div>;
 };
 
-const useChannel = (ctx, setCtx) => {
+const useChannel = (ctx, setCtx, messageCounts) => {
   return (e) => {
+    delete messageCounts[e];
     setCtx({ ...ctx, selectedChannelId: e });
   };
 };
