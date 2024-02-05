@@ -7,6 +7,7 @@ const styles = {
   "messages-group-dropdown-name": "hidden sm:inline",
   "menu-user-email": "hidden sm:inline",
   "menu-user-hamburger": "inline sm:hidden",
+  "left-column-selected-channel": "border-solid border-white",
 };
 
 export default styles;

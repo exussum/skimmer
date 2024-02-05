@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import Select from "./select";
 import { useCallback } from "react";
 import styles from "../styles";
+import { useContext } from "react";
+import { AuthContext } from "../api/auth";
 
 const BLUR = " "; /* blur-sm */
 
@@ -24,15 +26,23 @@ export const ChannelNav = ({ channels, onSelect }) => {
 };
 
 const Channel = ({ id, channelType, onClick, identity }) => {
+  const { ctx } = useContext(AuthContext);
   const click = useCallback(
     (e) => {
-      onClick(e.currentTarget.value);
+      onClick(Number(e.currentTarget.value));
     },
     [onClick],
   );
   return (
     <li key={id}>
-      <Button onClick={click} variant="skimmer" className="block w-full text-left" value={id}>
+      <Button
+        onClick={click}
+        variant="skimmer"
+        className={`block w-full text-left ${
+          ctx.selectedChannelId === id ? styles["left-column-selected-channel"] : ""
+        }`}
+        value={id}
+      >
         <div className="min-w-full">{channelType}</div>
         <div className="min-w-full text-xs overflow-hidden text-ellipsis">{identity}</div>
       </Button>

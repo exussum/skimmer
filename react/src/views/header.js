@@ -1,7 +1,7 @@
 import { useDeleteChannelMutation, useStatsQuery } from "../api/channel";
 import { AuthContext, useLoginRedirectQuery, useLogoutQuery, useWhoAmIQuery } from "../api/auth";
 import { UserMenu, GuestUserWarning, GoogleButton } from "../component/auth";
-import { useRef, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import { useCookies } from "react-cookie";
 
@@ -26,13 +26,13 @@ export const Header = ({ className }) => {
 
 const KnownUser = () => {
   const { ctx, setCtx } = useContext(AuthContext);
-  const { data } = useStatsQuery(ctx.lastSeenMessageId);
+  const { data } = useStatsQuery();
 
   if (data) {
-    if (ctx.lastSeenMessageId.current) {
+    if (localStorage.getItem("lastSeenMessageId") > data.lastMessageId) {
       Notification.requestPermission().then(() => new Notification("Skimmer has new notifications"));
     }
-    ctx.lastSeenMessageId.current = data.lastMessageId;
+    localStorage.setItem("lastSeenMessageId", data.lastMessageId);
   }
 
   return (
@@ -47,7 +47,6 @@ const KnownUser = () => {
 
 const UnknownUser = () => {
   const { setCtx, isLoading, data, error } = useWhoAmIQuery();
-  const lastSeenMessageId = useRef("");
 
   useEffect(() => {
     if (!isLoading) {
@@ -61,7 +60,6 @@ const UnknownUser = () => {
           channels: data.channels,
           selectedChannelId: activeChannels.length && activeChannels[0].id,
           subbedChannels: activeChannels,
-          lastSeenMessageId: lastSeenMessageId,
         });
       }
     }

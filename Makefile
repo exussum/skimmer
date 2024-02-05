@@ -1,5 +1,7 @@
 export DOCKER_BUILDKIT = 1
 
+
+
 build_worker:
 	docker buildx build --platform=linux/arm64/v8 --progress plain -o /tmp/skimmer-worker-arm -t skimmer-worker-arm worker
 	docker buildx build --platform=linux/arm64/v8 --progress plain -t skimmer-worker-prod --build-context="skimmer-worker-arm=/tmp/skimmer-worker-arm" --load -f worker/Dockerfile.prod .
@@ -26,3 +28,6 @@ source:
 
 migrate:
 	cd k8s; atlas migrate hash; atlas migrate apply --env local
+
+build: build_worker build_api build_fe
+push: push_worker push_api push_fe
