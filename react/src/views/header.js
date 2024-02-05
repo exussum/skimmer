@@ -1,4 +1,4 @@
-import { useDeleteChannelMutation, useStatsQuery } from "../api/channel";
+import { useDeleteChannelMutation } from "../api/channel";
 import { AuthContext, useLoginRedirectQuery, useLogoutQuery, useWhoAmIQuery } from "../api/auth";
 import { UserMenu, GuestUserWarning, GoogleButton } from "../component/auth";
 import { useContext, useEffect } from "react";
@@ -26,15 +26,6 @@ export const Header = ({ className }) => {
 
 const KnownUser = () => {
   const { ctx, setCtx } = useContext(AuthContext);
-  const { data } = useStatsQuery();
-
-  if (data) {
-    if (localStorage.getItem("lastSeenMessageId") > data.lastMessageId) {
-      Notification.requestPermission().then(() => new Notification("Skimmer has new notifications"));
-    }
-    localStorage.setItem("lastSeenMessageId", data.lastMessageId);
-  }
-
   return (
     <UserMenu
       login={ctx.email}

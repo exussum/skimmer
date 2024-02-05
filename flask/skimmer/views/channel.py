@@ -31,7 +31,14 @@ def delete_channel(user_id, id):
 @flask.protect
 def stats(user_id):
     last_message_id = request.args.get("last_message_id")
-    return channel.get_stats(user_id, last_message_id)._asdict()
+    result = channel.get_stats(user_id, last_message_id)
+    return {
+        "last_message_id": result.last_message_id,
+        "channel_stats": [
+            {"id": e.id, "messages": e.messages, "messages_per_group": e.messages_per_group}
+            for e in result.channel_stats
+        ],
+    }
 
 
 @bp.route("/<id>", methods=["GET"])

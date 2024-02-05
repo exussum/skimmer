@@ -8,9 +8,16 @@ import { AuthContext } from "../api/auth";
 
 const BLUR = " "; /* blur-sm */
 
-export const ChannelNav = ({ channels, onSelect }) => {
+export const ChannelNav = ({ channels, onSelect, messageCounts }) => {
   const buttons = channels.map((e) => (
-    <Channel key={e.id} identity={e.identity} channelType={e.channelType} id={e.id} onClick={onSelect} />
+    <Channel
+      key={e.id}
+      identity={e.identity}
+      channelType={e.channelType}
+      messageCount={messageCounts[e.id]}
+      id={e.id}
+      onClick={onSelect}
+    />
   ));
 
   const { t } = useTranslation();
@@ -25,7 +32,7 @@ export const ChannelNav = ({ channels, onSelect }) => {
   );
 };
 
-const Channel = ({ id, channelType, onClick, identity }) => {
+const Channel = ({ id, channelType, onClick, identity, messageCount }) => {
   const { ctx } = useContext(AuthContext);
   const click = useCallback(
     (e) => {
@@ -43,7 +50,9 @@ const Channel = ({ id, channelType, onClick, identity }) => {
         }`}
         value={id}
       >
-        <div className="min-w-full">{channelType}</div>
+        <div className="min-w-full">
+          {channelType} {messageCount ? `[${messageCount}]` : ""}
+        </div>
         <div className="min-w-full text-xs overflow-hidden text-ellipsis">{identity}</div>
       </Button>
     </li>

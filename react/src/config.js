@@ -16,7 +16,6 @@ apiClient.interceptors.response.use(
     return e;
   },
   (e) => {
-    console.log(e);
     if (e.response && 401 === e.response.status) {
       window.location.reload();
     } else {

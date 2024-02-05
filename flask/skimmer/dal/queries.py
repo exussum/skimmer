@@ -10,7 +10,7 @@ from skimmer.db import db
 session = db.session
 
 Message = nt("Message", "id  sent  sender  subject  body  group_id external_id")
-ChannelStats = nt("ChannelStats", "id type messages_per_group")
+ChannelStats = nt("ChannelStats", "id type messages messages_per_group")
 Stats = nt("Stats", "last_message_id channel_stats")
 
 
@@ -248,7 +248,8 @@ class bulk_message_handler:
 def _stats_query_to_records(m, e):
     x = m.get(e.id)
     if not x:
-        m[e[0]] = ChannelStats(e[0], e[1], {e[2]: e[3]})
+        m[e[0]] = ChannelStats(e[0], e[1], e[3], {e[2]: e[3]})
     else:
         x.messages_per_group[e[2]] = e[3]
+        m[e.id] = x._replace(messages=x.messages + e[3])
     return m
