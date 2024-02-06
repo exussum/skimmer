@@ -9,7 +9,7 @@ export const SideNav = () => {
   const [messageCounts, setMessageCounts] = useState({});
   const reset = useCallback(() => {
     setMessageCounts({});
-  }, [localStorage]);
+  }, []);
 
   if (data) {
     if (localStorage.getItem("lastSeenMessageId") < data.lastMessageId) {

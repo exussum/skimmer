@@ -1,5 +1,9 @@
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
+
 import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+import CloseButton from "react-bootstrap/CloseButton";
 import Dropdown from "react-bootstrap/Dropdown";
 import styles from "../styles";
 
@@ -40,7 +44,7 @@ export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
     });
 
   return (
-    <Dropdown>
+    <Dropdown autoClose="outside">
       <Dropdown.Toggle variant="skimmer">
         <span className={`${styles["menu-user-hamburger"]}`}>&#9776;</span>
         <span className={`${styles["menu-user-email"]}`}>{login}</span>
@@ -58,18 +62,59 @@ export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
 
 const ChannelItem = ({ id, deleteChannel, addPath, channelType, identity }) => {
   const { t } = useTranslation();
-  const action = id ? t("Remove Channel Action") : t("Add Channel Action");
-  const onClick = () => {
-    if (id) {
-      deleteChannel(id);
-    } else {
-      window.location = addPath;
-    }
-  };
+  const [show, setShow] = useState(false);
+  if (!id) {
+    return (
+      <Dropdown.Item onClick={() => (window.location = addPath)}>
+        {t("Add Channel Action")} {channelType}
+      </Dropdown.Item>
+    );
+  } else {
+    return (
+      <Dropdown.Item onClick={() => setShow(true)}>
+        {t("Remove Channel Action")} {channelType} [{identity}]
+        <DeleteConfirmation deleteChannel={() => deleteChannel(id)} show={show} setShow={setShow} />
+      </Dropdown.Item>
+    );
+  }
+};
+
+const DeleteConfirmation = ({ deleteChannel, show, setShow }) => {
+  const { t } = useTranslation();
+
   return (
-    <Dropdown.Item onClick={onClick}>
-      {action} {channelType} {identity ? `[${identity}]` : ""}
-    </Dropdown.Item>
+    <Modal show={show} variant="skimmer">
+      <Modal.Header>
+        <Modal.Title>Delete Channel?</Modal.Title>
+        {/* Using react-bootstrap's close button via Modal.Header eats the event needed to stop propogating */}
+        <CloseButton
+          aria-label="Close"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShow(false);
+          }}
+        />
+      </Modal.Header>
+
+      <Modal.Body>
+        <p>Deleting channel will remove all messages, and lose categorisation for this channel. Continue?</p>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button
+          variant="skimmer"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShow(false);
+          }}
+        >
+          Close
+        </Button>
+        <Button variant="skimmer-danger" onClick={deleteChannel}>
+          Confirm
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 

@@ -1,13 +1,13 @@
 import { useRef, useEffect, useCallback } from "react";
 
-const InPlaceModal = (props) => {
+const InPlaceModal = ({ setVisible, children, visible }) => {
   const dropDownRef = useRef(null);
 
   const dismiss = useCallback(
     (e) => {
-      props.setVisible(dropDownRef.current.contains(e.target));
+      setVisible(dropDownRef.current.contains(e.target));
     },
-    [dropDownRef, props],
+    [dropDownRef, setVisible],
   );
 
   useEffect(() => {
@@ -19,8 +19,8 @@ const InPlaceModal = (props) => {
 
   return (
     <div ref={dropDownRef}>
-      <div className={`relative ${props.visible ? "" : "hidden"} w-min`}>
-        <div className="absolute">{props.children}</div>
+      <div className={`relative ${visible ? "" : "hidden"} w-min`}>
+        <div className="absolute">{children}</div>
       </div>
     </div>
   );
