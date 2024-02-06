@@ -6,6 +6,7 @@ import dramatiq
 import psycopg2
 import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
 from dramatiq.brokers.rabbitmq import RabbitmqBroker
 
 WORKER_DB_URI = os.environ.get("WORKER_DB_URI")
@@ -57,6 +58,8 @@ def connection():
 
 def scheduler():
     scheduler = BlockingScheduler()
-    scheduler.add_job(queue_update_channels, "interval", minutes=1, next_run_time=datetime.now())
-    scheduler.add_job(cleanup_messages, "interval", minutes=10, next_run_time=datetime.now())
+    scheduler.add_job(
+        queue_update_channels, CronTrigger.from_crontab("*/1 0-4,10-23 * * *"), next_run_time=datetime.now()
+    )
+    scheduler.add_job(cleanup_messages, CronTrigger.from_crontab("0 0-4,10-23 * * *"), next_run_time=datetime.now())
     scheduler.start()
