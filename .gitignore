@@ -5,3 +5,4 @@ kubeconfig
 *.pem
 dependencies
 Pulumi.*.yaml
+pgdata-16.1

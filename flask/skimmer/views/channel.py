@@ -1,5 +1,3 @@
-from email.utils import parseaddr
-
 from flask import Blueprint, redirect, request, session
 from skimmer.api import auth, channel, flask
 from skimmer.config import Config
@@ -30,7 +28,11 @@ def delete_channel(user_id, id):
 @bp.route("/stats", methods=["GET"])
 @flask.protect
 def stats(user_id):
-    last_message_id = request.args.get("last_message_id")
+    try:
+        last_message_id = int(request.args.get("last_message_id"))
+    except ValueError:
+        last_message_id = ""
+
     result = channel.get_stats(user_id, last_message_id)
     return {
         "last_message_id": result.last_message_id,
@@ -39,19 +41,3 @@ def stats(user_id):
             for e in result.channel_stats
         ],
     }
-
-
-@bp.route("/<id>", methods=["GET"])
-@flask.protect
-def get_channel(user_id, id):
-    return [
-        {
-            "id": m.id,
-            "from": next(e for e in parseaddr(m.sender) if e),
-            "sent": m.sent.isoformat(),
-            "subject": m.subject,
-            "body": m.body,
-            "group_id": m.group_id,
-        }
-        for m in channel.fetch_messages(user_id, id, False)
-    ]

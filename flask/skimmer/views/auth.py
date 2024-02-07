@@ -2,7 +2,7 @@ import click
 
 from flask import Blueprint, make_response, redirect, request, session, url_for
 from skimmer.api.auth import add_user, id_for_email, oauth_token_req, submit_oauth_code
-from skimmer.api.channel import ChannelType, fetch_channels
+from skimmer.api.channel import fetch_channels
 from skimmer.config import Config
 
 bp = Blueprint("auth", __name__)

@@ -34,3 +34,7 @@ const hideMessage = async ({ messageIds }) => {
 export const useHideMutation = () => {
   return useMutation(hideMessage);
 };
+
+export const getMessages = async ({ queryKey }) => {
+  return apiClient.get(`/message/channel/${queryKey[1]}`).then((r) => r.data);
+};

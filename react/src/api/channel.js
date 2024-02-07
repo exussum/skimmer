@@ -1,10 +1,6 @@
 import { apiClient } from "../config";
 import { useQuery, useMutation } from "react-query";
 
-export const getChannel = async ({ queryKey }) => {
-  return apiClient.get(`/channel/${queryKey[1]}`).then((r) => r.data);
-};
-
 const deleteChannel = async ({ id }) => {
   return apiClient.delete(`/channel/${id}`);
 };

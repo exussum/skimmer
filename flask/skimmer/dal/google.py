@@ -95,7 +95,9 @@ class _FetchMessages:
             sent,
             frm,
             subject,
-            (text_content and text_content.get_content().strip()) or strip_html(html_content.get_content()),
+            (text_content and text_content.get_content().strip())
+            or (html_content and strip_html(html_content.get_content()))
+            or "",
         )
 
     @classmethod

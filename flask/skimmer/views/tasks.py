@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from skimmer.api import flask
-from skimmer.api.channel import update_messages_from_service
+from skimmer.api.message import update_messages_from_service
 
 bp = Blueprint("tasks", __name__)
 

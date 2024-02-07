@@ -1,8 +1,7 @@
 import { useState, useContext, createContext } from "react";
 import { AuthContext } from "../api/auth";
 import { useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
-import { useHideMutation, useSetGroupMutation } from "../api/message";
-import { getChannel } from "../api/channel";
+import { getMessages, useHideMutation, useSetGroupMutation } from "../api/message";
 import { useQueries } from "react-query";
 import { MessageList } from "../component/channel";
 import { GroupManager } from "../component/group";
@@ -28,8 +27,8 @@ const LoadingContent = ({ channelId }) => {
   const [messageResults, groupResults] = useQueries({
     queries: [
       {
-        queryKey: ["channel", channelId],
-        queryFn: getChannel,
+        queryKey: ["messages", channelId],
+        queryFn: getMessages,
         refetchInterval: 6000,
         refetchIntervalInBackground: true,
       },
