@@ -6,6 +6,8 @@ services:
     volumes:
       - ./flask:/app
     env_file: flask/.env
+    environment:
+      PYTHONUNBUFFERED: 1
   worker:
     build: worker
     volumes:

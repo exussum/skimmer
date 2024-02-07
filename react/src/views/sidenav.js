@@ -11,15 +11,18 @@ export const SideNav = () => {
     setMessageCounts({});
   }, []);
 
+  console.log(document.visibilityState);
   if (data) {
     if (localStorage.getItem("lastSeenMessageId") < data.lastMessageId) {
       for (const k of data.channelStats) {
         messageCounts[k.id] = (messageCounts[k.id] || 0) + k.messages;
       }
       setMessageCounts(messageCounts);
-      Notification.requestPermission().then(() => {
-        new Notification("Skimmer has new notifications").onclick = reset;
-      });
+      if (document.visibilityState === "hidden") {
+        Notification.requestPermission().then(() => {
+          new Notification("Skimmer has new notifications", { body: "New notifications waiting." }).onclick = reset;
+        });
+      }
     }
     localStorage.setItem("lastSeenMessageId", data.lastMessageId);
   }
