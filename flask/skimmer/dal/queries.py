@@ -61,9 +61,6 @@ def hide_messages(user_id, message_ids):
     message_ids = _fetch_valid_message_ids(user_id, message_ids)
 
     if message_ids:
-        import sys
-
-        print(message_ids, file=sys.stderr)
         session.execute(update(m.Message).where(m.Message.id.in_(message_ids)).values(hidden=True))
         session.commit()
 

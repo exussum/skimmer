@@ -53,13 +53,9 @@ def _persist_messages(channel, default_group, new_messages, local_messages):
 
         with bulk_message_handler(channel.user_id) as mh:
             for message, group_id in zip(new_messages, group_ids):
-                import sys
-
                 domain = parseaddr(message.sender)[1].split("@")
                 domain = domain[1] if len(domain) > 0 else domain
                 body = DOMAIN_TO_SANITISER.get(domain, lambda e: e)(message.body)
-                print(domain, file=sys.stderr)
-                print(DOMAIN_TO_SANITISER.get(domain), file=sys.stderr)
                 mh.add(
                     external_id=message.id,
                     sent=message.sent,
