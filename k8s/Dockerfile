@@ -19,4 +19,4 @@ RUN \
     tar xzvf /tmp/pulimi.tgz -C /tmp && \
     mv /tmp/pulumi/* /usr/bin && \
     /usr/bin/pulumi login --local
-ENTRYPOINT /bin/sh
+CMD /bin/echo "Cannot be run as a daemon by default."

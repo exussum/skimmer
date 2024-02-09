@@ -1,4 +1,4 @@
 FROM skimmer-worker-arm
 WORKDIR /app
 COPY ./worker/skimmer /app/skimmer
-CMD python skimmer/healthcheck.py && dramatiq -p 2 -f skimmer.worker:scheduler skimmer.worker
+CMD python skimmer/healthcheck.py && dramatiq -p 2 -f skimmer.scheduler:scheduler skimmer.app

@@ -11,6 +11,7 @@ from skimmer.dal.queries import (
     create_or_update_channel as create_or_update_channel_query,
     delete_channel as delete_channel_query,
     delete_groups,
+    fetch_channel_ids,
     fetch_channels as fetch_channels_query,
     get_stats,
 )

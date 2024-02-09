@@ -6,3 +6,4 @@ kubeconfig
 dependencies
 Pulumi.*.yaml
 pgdata-16.1
+k8s/env.schema.json

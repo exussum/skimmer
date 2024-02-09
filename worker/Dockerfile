@@ -6,4 +6,4 @@ RUN \
     pip install --index-url http://registry.exussum.org:8080/simple/ --trusted-host registry.exussum.org -r requirements.txt && \
     rm -rf /root/.cache && \
     find /usr/local -name "*.pyc" | xargs rm
-CMD python skimmer/healthcheck.py && dramatiq -p 2 -f skimmer.worker:scheduler skimmer.worker
+CMD python skimmer/healthcheck.py && dramatiq -p 2 -f skimmer.scheduler:scheduler skimmer.app

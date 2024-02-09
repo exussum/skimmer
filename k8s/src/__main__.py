@@ -1,4 +1,5 @@
 """A Kubernetes Python Pulumi program"""
+import json
 from collections import namedtuple as nt
 from os import environ
 
@@ -23,8 +24,12 @@ REGISTRY = environ["IMAGE_REGISTRY"]
 config = pulumi.Config()
 
 
+def get_variables(section):
+    return json.load(open("../env.schema.json"))[section]
+
+
 def get_vars(x):
-    return [EnvVar(name=v, value=config.get_secret(v)) for v in x]
+    return [EnvVar(name=e, value=config.require(e)) for e in x]
 
 
 def short_deployment(config):
@@ -68,18 +73,7 @@ class Api:
     selector = {"app": "skimmer-api"}
     name = "skimmer-api"
     image_name = f"{REGISTRY}/skimmer-api-prod:latest"
-    env_vars = [
-        "FLASK_CHANNEL_URL",
-        "FLASK_PERMANENT_SESSION_LIFETIME",
-        "FLASK_SQLALCHEMY_DATABASE_URI",
-        "FLASK_SECRET_KEY",
-        "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET",
-        "GOOGLE_REDIRECT_URL",
-        "MEMCACHED_KEY_PREFIX",
-        "MEMCACHED_SERVER",
-        "REACT_HOME_URL",
-    ]
+    env_vars = get_variables("flask")
     env_var_args = []
     replicas = 2
 
@@ -115,7 +109,7 @@ class Worker:
     selector = {"app": "skimmer-worker"}
     name = "skimmer-worker"
     image_name = f"{REGISTRY}/skimmer-worker-prod:latest"
-    env_vars = ["FLASK_API_ENDPOINT_UPDATE_CHANNEL", "FLASK_SECRET_KEY", "RABBITMQ_URI", "WORKER_DB_URI"]
+    env_vars = get_variables("worker")
     env_var_args = []
     replicas = 1
 

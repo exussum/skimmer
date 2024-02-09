@@ -1,4 +1,6 @@
 import click
+import dramatiq
+from dramatiq.brokers.rabbitmq import RabbitmqBroker
 from flask_cors import CORS
 from flask_session import Session
 from pymemcache.client.base import Client
@@ -37,3 +39,7 @@ CORS(
 )
 Session(app)
 db.init_app(app)
+
+dramatiq.set_broker(RabbitmqBroker(url=Config.Rmq.RABBITMQ_URI))
+
+from skimmer.dal import rmq

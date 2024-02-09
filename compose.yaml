@@ -28,7 +28,9 @@ services:
     build: k8s
     volumes:
       - ./k8s:/app
-    env_file: k8s/.env
+      - ./env.schema.json:/app/env.schema.json
+    env_file:
+      - k8s/.env
   db:
     image: postgres:16.1
     environment:

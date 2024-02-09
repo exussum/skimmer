@@ -1,7 +1,7 @@
 from collections import namedtuple as nt
 from functools import reduce
 
-from sqlalchemy import column, delete, func, select, update
+from sqlalchemy import column, delete, func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 
 from skimmer.dal import models as m
@@ -108,6 +108,26 @@ def fetch_channels(user_id):
         .filter(m.Channel.user_id == user_id)
         .order_by(m.Channel.type, m.Channel.identity)
     )
+
+
+def vacuum_messages():
+    queries = [
+        "UPDATE message SET hidden = true WHERE sent < current_date - interval '1' day",
+        """
+        DELETE FROM message
+        WHERE message.group_id NOT IN (SELECT id FROM "group" WHERE system = true) AND
+              hidden = true AND
+              sent < current_date - interval '30' day
+    """,
+    ]
+
+    for q in queries:
+        session.execute(text(q))
+    session.commit()
+
+
+def fetch_channel_ids():
+    return [e[0] for e in session.query(m.Channel.id)]
 
 
 def add_group(user_id, channel_id, name, system=False):

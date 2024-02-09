@@ -29,6 +29,9 @@ class Config:
         FLASK_SQLALCHEMY_DATABASE_URI = get("FLASK_SQLALCHEMY_DATABASE_URI")
         FLASK_CHANNEL_URL = get("FLASK_CHANNEL_URL")
 
+    class Rmq:
+        RABBITMQ_URI = get("RABBITMQ_URI")
+
     class React:
         REACT_HOME_URL = get("REACT_HOME_URL")
 
