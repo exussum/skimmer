@@ -1,7 +1,7 @@
 FROM python:3.10.13-alpine3.19
 WORKDIR /app
 RUN \
-    apk --update add autoconf automake binutils cmake file g++ gcc gfortran libev libffi-dev linux-headers make musl-dev ninja-build openblas-dev patchelf postgresql-dev postgresql-libs python3-dev && \
+    apk --update add libmemcached-dev zlib-dev autoconf automake binutils cmake file g++ gcc gfortran libev libffi-dev linux-headers make musl-dev ninja-build openblas-dev patchelf postgresql-dev postgresql-libs python3-dev && \
     env pip install spin==0.4 Cython==0.29.35 meson-python && \
     env LDFLAGS="-g0 -Wl,--strip-all" pip wheel -w /app --no-binary :all: --no-build-isolation --no-deps numpy==1.25.2 && \
     pip install /app/*.whl && \
