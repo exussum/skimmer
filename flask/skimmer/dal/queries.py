@@ -236,6 +236,16 @@ def fetch_messages(user_id, channel_id, include_hidden):
     return (Message(*e) for e in result.order_by(m.Message.sent.desc()))
 
 
+def fetch_message(user_id, message_id):
+    result = (
+        session.query(m.Message)
+        .join(m.Message.group)
+        .join(m.Group.channel)
+        .filter(m.Channel.user_id == user_id, m.Message.id == message_id)
+    )
+    return result.first()
+
+
 class bulk_message_handler:
     def __init__(self, user_id):
         self.rows = []

@@ -22,3 +22,10 @@ def vacuum_messages():
 @flask.server_call
 def fetch_channel_ids():
     return list(channel.fetch_channel_ids())
+
+
+@bp.route("/mark_read", methods=["GET"])
+@flask.server_call
+def mark_read():
+    message.mark_read(request.args.get("user_id"), request.args.get("id"))
+    return ""

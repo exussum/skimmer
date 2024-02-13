@@ -10,6 +10,8 @@ MESSAGE_LINKEDIN_RE = re.compile(r"", re.MULTILINE)
 
 class GoogleChannel:
     fetch_messages = google.fetch_messages
+    mark_read = google.mark_read
+
     _redirect_url = build_url(Config.Flask.FLASK_CHANNEL_URL + "/code", type=ChannelType.Google.value)
 
     @staticmethod
@@ -19,7 +21,7 @@ class GoogleChannel:
             client_id=Config.Google.GOOGLE_CLIENT_ID,
             redirect_uri=GoogleChannel._redirect_url,
             response_type="code",
-            scope="openid profile email https://www.googleapis.com/auth/gmail.readonly",
+            scope="openid profile email https://www.googleapis.com/auth/gmail.modify",
             access_type="offline",
             prompt="consent",
         )

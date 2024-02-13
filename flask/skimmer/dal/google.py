@@ -83,6 +83,12 @@ def remote_call(f):
 
 
 @remote_call
+def mark_read(service, id):
+    message_api = service.users().messages()
+    message_api.modify(userId="me", id=id, body={"removeLabelIds": "UNREAD"}).execute()
+
+
+@remote_call
 def fetch_messages(service, exclude):
     # Google counts batched calls as individual calls to their api, which counts against the quota.
     # So we return 5 at a time.

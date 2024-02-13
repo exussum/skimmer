@@ -11,6 +11,7 @@ from skimmer.dal.queries import (
     bulk_message_handler,
     fetch_channel,
     fetch_groups,
+    fetch_message,
     fetch_messages as fetch,
     get_stats,
     hide_messages as hide,
@@ -46,6 +47,12 @@ def update_messages_from_service(channel_id):
     new_messages = [e for e in remote_messages if e.id not in local_ids]
 
     _persist_messages(channel, default_group, new_messages, local_messages)
+
+
+def mark_read(user_id, message_id):
+    message = fetch_message(user_id, message_id)
+    if message:
+        TYPE_TO_CHANNEL[message.group.channel.type.value].mark_read(message.group.channel.id, message.external_id)
 
 
 def _persist_messages(channel, default_group, new_messages, local_messages):
