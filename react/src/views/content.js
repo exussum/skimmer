@@ -1,14 +1,15 @@
-import { useState, useContext, createContext } from "react";
+import Button from "react-bootstrap/Button";
+import InPlaceModal from "../component/modal";
 import { AuthContext } from "../api/auth";
+import { GroupManager } from "../component/group";
+import { Loading } from "../component/icons";
+import { MessageList } from "../component/channel";
+import { MouseInUseContext } from "../api/mouse";
 import { useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
 import { useMarkReadMutation, getMessages, useAcknowledgeMutation, useSetGroupMutation } from "../api/message";
 import { useQueries } from "react-query";
-import { MessageList } from "../component/channel";
-import { GroupManager } from "../component/group";
+import { useState, useContext, createContext } from "react";
 import { useTranslation } from "react-i18next";
-import Button from "react-bootstrap/Button";
-import { Loading } from "../component/icons";
-import InPlaceModal from "../component/modal";
 
 const GroupContext = createContext(null);
 
@@ -24,19 +25,22 @@ export const Content = () => {
 
 const LoadingContent = ({ channelId }) => {
   const { t } = useTranslation();
+  const mouseMoving = useContext(MouseInUseContext);
+  const [processing, setProcessing] = useState(false);
+
   const [messageResults, groupResults] = useQueries({
     queries: [
       {
         queryKey: ["messages", channelId],
         queryFn: getMessages,
-        refetchInterval: 6000,
+        refetchInterval: () => {
+          return !mouseMoving && 6000;
+        },
         refetchIntervalInBackground: true,
       },
       { queryKey: ["groups", channelId], queryFn: fetchGroups },
     ],
   });
-
-  const [processing, setProcessing] = useState(false);
 
   if (messageResults.data && groupResults.data) {
     return (
