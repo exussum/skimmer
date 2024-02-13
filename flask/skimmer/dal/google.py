@@ -4,6 +4,7 @@ import sys
 from base64 import urlsafe_b64decode
 from datetime import datetime
 from email import policy, utils
+from itertools import islice
 
 import jwt
 import requests
@@ -68,17 +69,37 @@ def refresh_access_token(token):
     return result.json()["access_token"]
 
 
-def fetch_messages(channel_id, exclude):
-    (user_id, access_token, refresh_token, identity) = fetch_channel_tokens(channel_id)
-    try:
-        return _FetchMessages.execute(access_token, exclude)
-    except Exception:
-        access_token = refresh_access_token(refresh_token)
-        create_or_update_channel(user_id, access_token, refresh_token, ChannelType.Google, identity)
-        return _FetchMessages.execute(access_token, exclude)
+def remote_call(f):
+    def g(channel_id, *args, **kwargs):
+        (user_id, access_token, refresh_token, identity) = fetch_channel_tokens(channel_id)
+        try:
+            return f(build("gmail", "v1", credentials=Credentials(access_token)), *args, **kwargs)
+        except Exception:
+            access_token = refresh_access_token(refresh_token)
+            create_or_update_channel(user_id, access_token, refresh_token, ChannelType.Google, identity)
+            return f(build("gmail", "v1", credentials=Credentials(access_token)), *args, **kwargs)
+
+    return g
 
 
-class _FetchMessages:
+@remote_call
+def fetch_messages(service, exclude):
+    # Google counts batched calls as individual calls to their api, which counts against the quota.
+    # So we return 5 at a time.
+
+    message_api = service.users().messages()
+    list_response = message_api.list(userId="me", labelIds=["INBOX"], q="newer_than:2d").execute()
+    new_ids = islice((e["id"] for e in list_response["messages"] if e["id"] not in exclude), 0, 5)
+
+    callback = FetchMessageCallback()
+    bt = service.new_batch_http_request(callback=callback)
+    for id in new_ids:
+        bt.add(message_api.get(userId="me", id=id, format="raw"))
+    bt.execute()
+    return callback.result.values()
+
+
+class FetchMessageCallback:
     def __init__(self):
         self.result = {}
 
@@ -99,24 +120,6 @@ class _FetchMessages:
             or (html_content and strip_html(html_content.get_content()))
             or "",
         )
-
-    @classmethod
-    def execute(cls, access_token, exclude):
-        service = _build_service(access_token)
-        message_api = service.users().messages()
-        list_response = message_api.list(userId="me", labelIds=["INBOX"], q="newer_than:2d").execute()
-
-        callback = cls()
-        bt = service.new_batch_http_request(callback=callback)
-        for e in list_response["messages"]:
-            if e["id"] not in exclude:
-                bt.add(message_api.get(userId="me", id=e["id"], format="raw"))
-        bt.execute()
-        return callback.result.values()
-
-
-def _build_service(token):
-    return build("gmail", "v1", credentials=Credentials(token))
 
 
 def _tag_visible(element):

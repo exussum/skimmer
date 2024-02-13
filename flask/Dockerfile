@@ -7,4 +7,4 @@ RUN \
     rm -rf /root/.cache && \
     find /usr/local -name "*.pyc" | xargs rm
 
-CMD env DEBUG=true gunicorn -w 4 -b 0.0.0.0 'skimmer.app:app'
+CMD env DEBUG=true gunicorn -w 4 -b 0.0.0.0 'skimmer.app:app' --reload
