@@ -30,7 +30,11 @@ class GoogleChannel:
 
 
 def linkedin(message):
-    return " ".join(message.split("\n")[5:]) if "InMail: You have a new message" in message else message
+    if "InMail: You have a new message" in message:
+        return " ".join(message.split("\n")[5:])
+    elif "replied to your comment" in message:
+        return " ".join(message.split("\n")[2:])
+    return message
 
 
 DOMAIN_TO_SANITISER = {"linkedin.com": linkedin}

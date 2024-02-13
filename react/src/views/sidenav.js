@@ -11,7 +11,6 @@ export const SideNav = () => {
     setMessageCounts({});
   }, []);
 
-  console.log(document.visibilityState);
   if (data) {
     if (localStorage.getItem("lastSeenMessageId") < data.lastMessageId) {
       for (const k of data.channelStats) {

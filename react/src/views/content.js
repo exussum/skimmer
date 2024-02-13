@@ -1,13 +1,13 @@
 import { useState, useContext, createContext } from "react";
 import { AuthContext } from "../api/auth";
 import { useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
-import { getMessages, useHideMutation, useSetGroupMutation } from "../api/message";
+import { useMarkReadMutation, getMessages, useAcknowledgeMutation, useSetGroupMutation } from "../api/message";
 import { useQueries } from "react-query";
 import { MessageList } from "../component/channel";
 import { GroupManager } from "../component/group";
 import { useTranslation } from "react-i18next";
 import Button from "react-bootstrap/Button";
-import Loading from "../component/loading-status";
+import { Loading } from "../component/icons";
 import InPlaceModal from "../component/modal";
 
 const GroupContext = createContext(null);
@@ -105,12 +105,16 @@ const Groups = ({ channelId }) => {
 const Messages = ({ channelId, messages }) => {
   const { groups, setProcessing } = useContext(GroupContext);
   const setGroupMutation = useSetGroupMutation(setProcessing);
-  const hideMutation = useHideMutation(channelId);
+  const acknowledgeMutation = useAcknowledgeMutation();
+  const markReadMutation = useMarkReadMutation();
 
   return (
     <MessageList
-      hide={(messageIds) => {
-        hideMutation.mutate({ messageIds });
+      acknowledge={(messageIds) => {
+        acknowledgeMutation.mutate({ messageIds });
+      }}
+      markRead={(messageIds) => {
+        markReadMutation.mutate({ messageIds });
       }}
       setGroup={(groupId, messageIds) => {
         setGroupMutation.mutate(

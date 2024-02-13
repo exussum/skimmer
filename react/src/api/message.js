@@ -22,17 +22,30 @@ export const useSetGroupMutation = (setProcessing) => {
   return setGroupMutation;
 };
 
-const hideMessage = async ({ messageIds }) => {
+const acknowledgeMessage = async ({ messageIds }) => {
   const params = new URLSearchParams({
     messageIds: messageIds,
   });
-  return apiClient.post(`/message/hide`, params, {
+  return apiClient.post(`/message/acknowledge`, params, {
     headers: { "content-type": "application/x-www-form-urlencoded" },
   });
 };
 
-export const useHideMutation = () => {
-  return useMutation(hideMessage);
+export const useMarkReadMutation = () => {
+  return useMutation(markReadMessage);
+};
+
+const markReadMessage = async ({ messageIds }) => {
+  const params = new URLSearchParams({
+    messageIds: messageIds,
+  });
+  return apiClient.post(`/message/mark_read`, params, {
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+  });
+};
+
+export const useAcknowledgeMutation = () => {
+  return useMutation(acknowledgeMessage);
 };
 
 export const getMessages = async ({ queryKey }) => {

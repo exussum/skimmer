@@ -68,14 +68,14 @@ def refresh_access_token(token):
     return result.json()["access_token"]
 
 
-def fetch_messages(channel_id):
+def fetch_messages(channel_id, exclude):
     (user_id, access_token, refresh_token, identity) = fetch_channel_tokens(channel_id)
     try:
-        return _FetchMessages.execute(access_token)
+        return _FetchMessages.execute(access_token, exclude)
     except Exception:
         access_token = refresh_access_token(refresh_token)
         create_or_update_channel(user_id, access_token, refresh_token, ChannelType.Google, identity)
-        return _FetchMessages.execute(access_token)
+        return _FetchMessages.execute(access_token, exclude)
 
 
 class _FetchMessages:
@@ -101,7 +101,7 @@ class _FetchMessages:
         )
 
     @classmethod
-    def execute(cls, access_token):
+    def execute(cls, access_token, exclude):
         service = _build_service(access_token)
         message_api = service.users().messages()
         list_response = message_api.list(userId="me", labelIds=["INBOX"], q="newer_than:2d").execute()
@@ -109,7 +109,8 @@ class _FetchMessages:
         callback = cls()
         bt = service.new_batch_http_request(callback=callback)
         for e in list_response["messages"]:
-            bt.add(message_api.get(userId="me", id=e["id"], format="raw"))
+            if e["id"] not in exclude:
+                bt.add(message_api.get(userId="me", id=e["id"], format="raw"))
         bt.execute()
         return callback.result.values()
 

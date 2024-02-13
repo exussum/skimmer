@@ -9,15 +9,15 @@ from skimmer.api.integration import DOMAIN_TO_SANITISER, TYPE_TO_CHANNEL
 from skimmer.dal.models import SYSTEM_GROUP_GENERAL
 from skimmer.dal.queries import (
     bulk_message_handler,
-    delete_messages,
     fetch_channel,
     fetch_groups,
-    fetch_messages,
+    fetch_messages as fetch,
     get_stats,
-    hide_messages,
+    hide_messages as hide,
     set_group,
     vacuum_messages,
 )
+from skimmer.dal.rmq import queue_mark_read
 
 
 def predict(old_messages, new_messages):
@@ -37,10 +37,10 @@ def update_messages_from_service(channel_id):
     if not (channel and default_group):
         return
 
-    local_messages = list(fetch_messages(channel.user_id, channel.id, True))
-    remote_messages = list(TYPE_TO_CHANNEL[channel.type.value].fetch_messages(channel_id))
-
+    local_messages = list(fetch(channel.user_id, channel.id, True))
     local_ids = set(e.external_id for e in local_messages)
+
+    remote_messages = list(TYPE_TO_CHANNEL[channel.type.value].fetch_messages(channel_id, local_ids))
     remote_ids = set(e.id for e in remote_messages)
 
     new_messages = [e for e in remote_messages if e.id not in local_ids]

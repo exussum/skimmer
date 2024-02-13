@@ -11,6 +11,7 @@ from skimmer.dal.queries import (
     create_or_update_channel as create_or_update_channel_query,
     delete_channel as delete_channel_query,
     delete_groups,
+    delete_messages,
     fetch_channel_ids,
     fetch_channels as fetch_channels_query,
     get_stats,
@@ -39,8 +40,6 @@ def fetch_channels(user_id):
 
 
 def delete_channel(user_id, id):
-    from skimmer.api.message import delete_messages
-
     delete_messages(user_id, id)
     delete_groups(user_id, id)
     delete_channel_query(user_id, id)

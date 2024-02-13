@@ -15,12 +15,22 @@ def set_group(user_id, group_id):
     return []
 
 
-@bp.route("/hide", methods=["POST"])
+@bp.route("/acknowledge", methods=["POST"])
 @flask.protect
-def hide(user_id):
+def acknowledge(user_id):
     ids = request.form.getlist("message_ids")
     if ids:
-        message.hide_messages(user_id, ids)
+        message.hide(user_id, ids)
+    return []
+
+
+@bp.route("/mark_read", methods=["POST"])
+@flask.protect
+def mark_read(user_id):
+    ids = request.form.getlist("message_ids")
+    if ids:
+        message.hide(user_id, ids)
+        message.queue_mark_read(user_id, ids)
     return []
 
 
@@ -36,5 +46,5 @@ def get_messages(user_id, channel_id):
             "body": m.body,
             "group_id": m.group_id,
         }
-        for m in message.fetch_messages(user_id, channel_id, False)
+        for m in message.fetch(user_id, channel_id, False)
     ]
