@@ -2,7 +2,7 @@ import Button from "react-bootstrap/Button";
 import InPlaceModal from "../component/modal";
 import { AuthContext } from "../api/auth";
 import { GroupManager } from "../component/group";
-import { Loading } from "../component/icons";
+import { Loading, PlayPause } from "../component/icons";
 import { MessageList } from "../component/channel";
 import { MouseInUseContext } from "../api/mouse";
 import { useAddGroupMutation, useDeleteGroupMutation, fetchGroups } from "../api/group";
@@ -46,7 +46,11 @@ const LoadingContent = ({ channelId }) => {
     return (
       <GroupContext.Provider value={{ groups: groupResults.data, processing, setProcessing }}>
         <div className="flex-1 flex-col">
-          <Groups channelId={channelId} />
+          <div className="flex justify-between items-center">
+            <Groups channelId={channelId} />
+            <PlayPause active={!mouseMoving} />
+          </div>
+
           <Messages messages={messageResults.data} channelId={channelId} />
         </div>
       </GroupContext.Provider>
@@ -78,7 +82,7 @@ const Groups = ({ channelId }) => {
   const { t } = useTranslation();
 
   return (
-    <>
+    <div>
       <Button
         variant="skimmer"
         onClick={(e) => {
@@ -102,7 +106,7 @@ const Groups = ({ channelId }) => {
           }}
         />
       </InPlaceModal>
-    </>
+    </div>
   );
 };
 
