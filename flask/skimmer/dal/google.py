@@ -83,9 +83,26 @@ def remote_call(f):
 
 
 @remote_call
-def mark_read(service, id):
+def mark_read(service, message):
+    label_api = service.users().labels()
     message_api = service.users().messages()
-    message_api.modify(userId="me", id=id, body={"removeLabelIds": "UNREAD"}).execute()
+
+    if not message.group.system:
+        labels = label_api.list(userId="me").execute()["labels"]
+        label_id = next((e["id"] for e in labels if e["name"] == message.group.name), None)
+        if not label_id:
+            label_id = label_api.create(
+                userId="me",
+                body={"labelListVisibility": "labelShow", "messageListVisibility": "show", "name": message.group.name},
+            ).execute()["id"]
+
+        print(label_id, message.subject)
+        message_api.modify(
+            userId="me", id=message.external_id, body={"removeLabelIds": "UNREAD", "addLabelIds": label_id}
+        ).execute()
+    else:
+        message_api.modify(userId="me", id=message.external_id, body={"removeLabelIds": "UNREAD"}).execute()
+    return
 
 
 @remote_call

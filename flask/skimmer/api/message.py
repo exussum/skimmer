@@ -1,5 +1,6 @@
 from email.utils import parseaddr
 
+import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics import accuracy_score
 from sklearn.naive_bayes import MultinomialNB
@@ -28,6 +29,7 @@ def predict(old_messages, new_messages):
     incoming = [f"{e.sender} {e.subject} {e.body}" for e in new_messages]
     pipeline.fit(corpus, labels)
     predictions = pipeline.predict(incoming)
+    print(np.mean(pipeline.predict(corpus) == labels))
     return [e.item() for e in predictions]
 
 
@@ -52,7 +54,7 @@ def update_messages_from_service(channel_id):
 def mark_read(user_id, message_id):
     message = fetch_message(user_id, message_id)
     if message:
-        TYPE_TO_CHANNEL[message.group.channel.type.value].mark_read(message.group.channel.id, message.external_id)
+        TYPE_TO_CHANNEL[message.group.channel.type.value].mark_read(message.group.channel.id, message)
 
 
 def _persist_messages(channel, default_group, new_messages, local_messages):
