@@ -117,7 +117,7 @@ def vacuum_messages():
         DELETE FROM message
         WHERE message.group_id NOT IN (SELECT id FROM "group" WHERE system = true) AND
               hidden = true AND
-              sent < current_date - interval '30' day
+              sent < current_date - interval '90' day
     """,
     ]
 

@@ -7,7 +7,7 @@ import { useContext } from "react";
 import { AuthContext } from "../api/auth";
 import { Acknowledge, MarkRead } from "./icons";
 
-const BLUR = " "; /* blur-sm */
+const BLUR = ""; /* blur-sm */
 
 export const ChannelNav = ({ channels, onSelect, messageCounts }) => {
   const buttons = channels.map((e) => (
@@ -102,14 +102,14 @@ const Item = ({ message, setGroup, groups, acknowledge, markRead }) => {
 
       <div
         data-message-id={id}
-        className={`p-2 overflow-hidden bg-menu ${BLUR} flex flex-row ${styles["messages-from-text-wrap"]}`}
+        className={`p-2 overflow-hidden bg-menu flex flex-row ${styles["messages-from-text-wrap"]}`}
       >
         <div className="basis-[100px] shrink-0 text-ellipsis overflow-hidden whitespace-nowrap">{from}</div>
         <div className="basis-[150px] flex-1 overflow-hidden flow-0">
-          <div className="text-ellipsis overflow-hidden whitespace-nowrap">
-            <span className="font-bold">{subject}</span>
+          <div className={`${BLUR} text-ellipsis overflow-hidden whitespace-nowrap font-bold`}>{subject}</div>
+          <div className={`${BLUR} text-ellipsis overflow-hidden whitespace-wrap ${styles["messages-clamp"]}`}>
+            {body}
           </div>
-          <div className={`text-ellipsis overflow-hidden whitespace-wrap ${styles["messages-clamp"]}`}>{body}</div>
         </div>
       </div>
       <div data-message-id={id} className="bg-menu p-2">
