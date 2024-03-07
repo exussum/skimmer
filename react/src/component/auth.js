@@ -36,6 +36,7 @@ export const UserMenu = ({ channels, login, onClick, deleteChannel }) => {
           key={`channel-${i}`}
           id={e.id}
           channelType={e.channelType}
+          channelName={e.channelName}
           addPath={e.addPath}
           deleteChannel={deleteChannel}
           identity={e.identity}

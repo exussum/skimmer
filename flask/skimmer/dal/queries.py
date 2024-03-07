@@ -209,7 +209,10 @@ def delete_groups(user_id, channel_id):
 
 def fetch_channel_tokens(channel_id):
     return (
-        session.query(m.Channel.user_id, m.Channel.access_token, m.Channel.refresh_token, m.Channel.identity)
+        session.query(
+            m.Channel.user_id, m.User.email, m.Channel.access_token, m.Channel.refresh_token, m.Channel.identity
+        )
+        .join(m.Channel.user)
         .filter(m.Channel.id == channel_id)
         .one_or_none()
     )

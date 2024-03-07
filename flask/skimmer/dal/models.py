@@ -30,6 +30,7 @@ class Group(Base):
 
 class ChannelType(enum.Enum):
     Google = "Google"
+    GoogleImap = "Google IMAP"
 
 
 class Channel(Base):
@@ -40,6 +41,7 @@ class Channel(Base):
     access_token: Mapped[str]
     refresh_token: Mapped[str]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user: Mapped[User] = relationship()
     groups: Mapped[List["Group"]] = relationship(back_populates="channel")
 
 

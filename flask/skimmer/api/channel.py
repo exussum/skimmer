@@ -33,7 +33,7 @@ def submit_code(user_id, type, code):
 
 def fetch_channels(user_id):
     channels = fetch_channels_query(user_id)
-    builder = lambda e: build_url(Config.Flask.FLASK_CHANNEL_URL + "/start", type=e.value)
+    builder = lambda e: build_url(Config.Flask.FLASK_CHANNEL_URL + "/start", type=e.name)
     return [ChannelSub(id, type.value, identity, builder(type)) for (id, type, identity) in channels] + [
         ChannelSub(None, e.value, None, builder(e)) for e in ChannelType
     ]

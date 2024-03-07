@@ -22,14 +22,16 @@ from skimmer.dal.queries import (
 from skimmer.dal.rmq import queue_mark_read
 
 
-def predict(old_messages, new_messages):
+def _predict(old_messages, new_messages):
     pipeline = Pipeline([("vect", CountVectorizer()), ("tdiff", TfidfTransformer()), ("class", MultinomialNB())])
     corpus = [f"{e.sender} {e.subject} {e.body}" for e in old_messages]
     labels = [e.group_id for e in old_messages]
     incoming = [f"{e.sender} {e.subject} {e.body}" for e in new_messages]
     pipeline.fit(corpus, labels)
     predictions = pipeline.predict(incoming)
-    print(np.mean(pipeline.predict(corpus) == labels))
+
+    confidence = np.mean(pipeline.predict(corpus) == labels)
+
     return [e.item() for e in predictions]
 
 
@@ -43,7 +45,7 @@ def update_messages_from_service(channel_id):
     local_messages = list(fetch(channel.user_id, channel.id, True))
     local_ids = set(e.external_id for e in local_messages)
 
-    remote_messages = list(TYPE_TO_CHANNEL[channel.type.value].fetch_messages(channel_id, local_ids))
+    remote_messages = list(TYPE_TO_CHANNEL[channel.type.name].fetch_messages(channel_id, local_ids))
     remote_ids = set(e.id for e in remote_messages)
 
     new_messages = [e for e in remote_messages if e.id not in local_ids]
@@ -54,12 +56,12 @@ def update_messages_from_service(channel_id):
 def mark_read(user_id, message_id):
     message = fetch_message(user_id, message_id)
     if message:
-        TYPE_TO_CHANNEL[message.group.channel.type.value].mark_read(message.group.channel.id, message)
+        TYPE_TO_CHANNEL[message.group.channel.type.name].mark_read(message.group.channel.id, message)
 
 
 def _persist_messages(channel, default_group, new_messages, local_messages):
     if new_messages:
-        group_ids = predict(local_messages, new_messages) if local_messages else [default_group.id] * len(new_messages)
+        group_ids = _predict(local_messages, new_messages) if local_messages else [default_group.id] * len(new_messages)
 
         with bulk_message_handler(channel.user_id) as mh:
             for message, group_id in zip(new_messages, group_ids):
